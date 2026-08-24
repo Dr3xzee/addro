@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graphic Design — Brands That Demand Attention | Addro Tech</title>
+    <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 60; background: white; padding: 0.75rem 2rem; border-radius: 9999px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .modal-overlay { backdrop-filter: blur(10px); background: rgba(0,0,0,0.3); }
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        
+        .mockup-card {
+            position: absolute;
+            border: 2px solid #000;
+            background: white;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .mockup-card:hover { transform: scale(1.05) rotate(0deg) !important; z-index: 50; }
+        
+        .deliverable-card {
+            border: 2px solid #000;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 3px 3px 0px #000;
+        }
+        .deliverable-card:hover { transform: translateY(-6px); box-shadow: 6px 10px 0px #000; }
+        
+        .faq-item { border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
+        .faq-icon { transition: transform 0.3s ease; }
+        .faq-item.open .faq-icon { transform: rotate(45deg); }
+        
+        .pricing-card { border: 2px solid #000; border-radius: 20px; overflow: hidden; transition: all 0.3s ease; }
+        .pricing-card:hover { transform: translateY(-4px); box-shadow: 6px 6px 0px #000; }
+        
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../index.html" class="hover:opacity-60 transition-opacity">Home</a>
+                    <a href="../services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                </nav>
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()"><h1 class="text-2xl font-black tracking-tighter">ADDRO</h1></div>
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../academy.html" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="../contact.html" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                <button class="md:hidden p-2" onclick="toggleHeader()"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+            </div>
+        </div>
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="../index.html" onclick="toggleHeader()">Home</a>
+                <a href="../services.html" onclick="toggleHeader()">Services</a>
+                <a href="../academy.html" onclick="toggleHeader()">Academy</a>
+                <a href="../contact.html" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-20 px-6 bg-white relative overflow-hidden min-h-screen flex items-center">
+        <div class="absolute inset-0 grid-bg opacity-40"></div>
+        <div class="max-w-7xl mx-auto w-full relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-up">
+                    <p class="text-sm font-medium tracking-widest uppercase mb-6 text-black/50">Graphic Design</p>
+                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 leading-[0.95]">
+                        Brands That<br>
+                        Demand<br>
+                        Attention.
+                    </h1>
+                    <p class="text-xl text-black/60 mb-10 leading-relaxed max-w-lg">
+                        Logos that stick. Colors that speak. Visual systems that make competitors look like they gave up. You bring the vision — we bring the obsession.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="openModal()" class="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)]">Design My Brand</button>
+                        <a href="#work" class="border-2 border-black px-8 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all text-center">See the Work</a>
+                    </div>
+                </div>
+                
+                <!-- Scattered Mockups -->
+                <div class="relative h-[500px] hidden lg:block fade-up" id="mockupScene">
+                    <div class="mockup-card w-48 h-32 rounded-xl overflow-hidden" style="top: 10%; left: 10%; transform: rotate(-8deg);">
+                        <img src="https://images.unsplash.com/photo-1634942537034-2531766767d1?w=300&h=200&fit=crop" class="w-full h-full object-cover" alt="Business card">
+                    </div>
+                    <div class="mockup-card w-40 h-40 rounded-full overflow-hidden" style="top: 5%; right: 15%; transform: rotate(12deg);">
+                        <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop" class="w-full h-full object-cover" alt="Logo design">
+                    </div>
+                    <div class="mockup-card w-56 h-36 rounded-xl overflow-hidden" style="top: 40%; left: 5%; transform: rotate(5deg);">
+                        <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=250&fit=crop" class="w-full h-full object-cover" alt="Brand identity">
+                    </div>
+                    <div class="mockup-card w-44 h-56 rounded-xl overflow-hidden" style="top: 35%; right: 5%; transform: rotate(-5deg);">
+                        <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=300&h=400&fit=crop" class="w-full h-full object-cover" alt="Packaging">
+                    </div>
+                    <div class="mockup-card w-52 h-32 rounded-xl overflow-hidden" style="bottom: 10%; left: 20%; transform: rotate(3deg);">
+                        <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=400&h=250&fit=crop" class="w-full h-full object-cover" alt="Social media">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem -->
+    <section class="py-20 px-6 bg-neutral-50">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-black tracking-tighter mb-4 fade-up">Bad Design is Expensive</h2>
+            <p class="text-black/60 mb-16 fade-up">You can't out-market ugly. Here's what cheap visuals actually cost you.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">🎨</div>
+                    <h3 class="font-bold text-lg mb-2">The DIY Disaster</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Canva logos and mismatched fonts signal "we're not serious." Customers can smell amateur work from a mile away — and they charge less because of it.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">😵‍💫</div>
+                    <h3 class="font-bold text-lg mb-2">Brand Schizophrenia</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Your Instagram looks nothing like your website, which looks nothing like your packaging. No recognition, no trust, no loyalty. Just noise.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">💸</div>
+                    <h3 class="font-bold text-lg mb-2">The Rebrand Tax</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Fixing bad design later costs 3x more than doing it right the first time. Plus you lose months of momentum while you scramble to look professional.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-4 fade-up">The Full Toolkit</h2>
+                <p class="text-black/60 fade-up">Everything your brand needs to look like it belongs in the room.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="deliverable-card fade-up">
+                    <div class="h-40 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Logo">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg mb-1">Logo & Wordmark</h3>
+                        <p class="text-sm text-black/60">Primary, secondary, and icon versions. Scalable from a favicon to a billboard.</p>
+                    </div>
+                </div>
+                <div class="deliverable-card fade-up">
+                    <div class="h-40 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Color palette">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg mb-1">Color & Typography System</h3>
+                        <p class="text-sm text-black/60">Locked-in palettes and font pairings that stay consistent across every platform.</p>
+                    </div>
+                </div>
+                <div class="deliverable-card fade-up">
+                    <div class="h-40 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Social media">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg mb-1">Social Media Kit</h3>
+                        <p class="text-sm text-black/60">Templates for posts, stories, covers, and ads — on-brand and ready to customize.</p>
+                    </div>
+                </div>
+                <div class="deliverable-card fade-up">
+                    <div class="h-40 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Stationery">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg mb-1">Business Stationery</h3>
+                        <p class="text-sm text-black/60">Business cards, letterheads, email signatures, and invoice templates.</p>
+                    </div>
+                </div>
+                <div class="deliverable-card fade-up">
+                    <div class="h-40 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1558655146-364adaf1fcc9?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Marketing">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg mb-1">Marketing Collateral</h3>
+                        <p class="text-sm text-black/60">Flyers, brochures, pitch decks, and presentation templates that close deals.</p>
+                    </div>
+                </div>
+                <div class="deliverable-card fade-up">
+                    <div class="h-40 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Packaging">
+                    </div>
+                    <div class="p-5">
+                        <h3 class="font-bold text-lg mb-1">Packaging & Merch</h3>
+                        <p class="text-sm text-black/60">Product packaging, labels, tote bags, and merchandise design.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process -->
+    <section class="py-24 px-6 bg-neutral-50">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-16 fade-up">From Vague to Iconic</h2>
+            <div class="space-y-8">
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">01</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">01</div>
+                        <h3 class="text-xl font-bold mb-2">Mood & Discovery</h3>
+                        <p class="text-black/60 leading-relaxed">We dig into your audience, competitors, and personality. Are you bold? Minimal? Playful? We find the visual language that fits who you actually are — not who you think you should be.</p>
+                    </div>
+                </div>
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">02</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">02</div>
+                        <h3 class="text-xl font-bold mb-2">Concept Exploration</h3>
+                        <p class="text-black/60 leading-relaxed">We present 2–3 distinct creative directions. Logo sketches, color palettes, and sample applications. You pick a lane, then we refine.</p>
+                    </div>
+                </div>
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">03</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">03</div>
+                        <h3 class="text-xl font-bold mb-2">Design & Refinement</h3>
+                        <p class="text-black/60 leading-relaxed">We build out the full identity system — every color code, every font weight, every spacing rule. Two rounds of revisions to get it pixel-perfect.</p>
+                    </div>
+                </div>
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">04</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">04</div>
+                        <h3 class="text-xl font-bold mb-2">Asset Delivery</h3>
+                        <p class="text-black/60 leading-relaxed">Source files, export kits, brand guidelines PDF, and a handoff call. Your team (or your printer) gets everything they need, formatted correctly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof -->
+    <section id="work" class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">Before & After</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Real brands. Real transformations.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="grid grid-cols-2">
+                        <div class="bg-neutral-200 p-6 flex items-center justify-center border-r border-black/10">
+                            <div class="text-center opacity-40">
+                                <div class="w-16 h-16 bg-neutral-400 rounded-full mx-auto mb-2"></div>
+                                <p class="text-xs font-bold">OLD LOGO</p>
+                            </div>
+                        </div>
+                        <div class="bg-black p-6 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="w-16 h-16 bg-white rounded-full mx-auto mb-2 flex items-center justify-center text-black font-black text-xl">A</div>
+                                <p class="text-xs font-bold text-white">NEW LOGO</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold">AfriCraft Artisan Market</h3>
+                            <span class="text-xs bg-black text-white px-2 py-1 rounded-full">REBRAND</span>
+                        </div>
+                        <p class="text-sm text-black/60 mb-4">From generic clipart logo to a bold, culturally-rooted identity system. Result: 3x increase in vendor applications and featured in Design Indaba.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">See Full Case Study →</a>
+                    </div>
+                </div>
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="h-48 bg-neutral-100 overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1600607686527-6fb886090705?w=700&h=400&fit=crop" class="w-full h-full object-cover" alt="Brand mockup">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="text-xl font-bold">NovaPay Fintech</h3>
+                            <span class="text-xs bg-black text-white px-2 py-1 rounded-full">BRAND NEW</span>
+                        </div>
+                        <p class="text-sm text-black/60 mb-4">Complete identity from scratch — logo, app iconography, marketing collateral, and investor pitch deck. Helped secure $400K pre-seed funding.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">See Full Case Study →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-20 px-6 bg-black text-white">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Investment</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="pricing-card bg-transparent border-white/20 p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Identity Starter</h3>
+                    <p class="text-4xl font-black mb-4">$900</p>
+                    <p class="text-sm text-white/60 mb-6">Perfect for new businesses ready to look legit.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Logo (3 concepts)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Color + font system</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Business card design</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Source files</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Get Started</button>
+                </div>
+                <div class="pricing-card bg-white text-black p-8 relative fade-up">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
+                    <h3 class="text-sm uppercase tracking-widest text-black/50 mb-2">Brand System</h3>
+                    <p class="text-4xl font-black mb-4">$2,200</p>
+                    <p class="text-sm text-black/60 mb-6">For businesses that need to show up everywhere.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Everything in Starter</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Social media templates (5)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Letterhead + email sig</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Brand guidelines PDF</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>3 revision rounds</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full bg-black text-white py-3 rounded-full font-bold hover:scale-105 transition-transform">Get Started</button>
+                </div>
+                <div class="pricing-card bg-transparent border-white/20 p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Total Package</h3>
+                    <p class="text-4xl font-black mb-4">$4,500</p>
+                    <p class="text-sm text-white/60 mb-6">The full experience. Launch-ready everything.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Everything in Brand System</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Packaging or merch design</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Pitch deck (10 slides)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Priority support (2 weeks)</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Questions</h2>
+            <div class="space-y-0">
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Do I get the source files?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Always. You get AI, EPS, PNG, SVG, and PDF formats. We don't hold your brand hostage — once it's paid for, it's yours forever.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">How many revision rounds?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">2 rounds for Starter, 3 for Brand System and Total Package. Additional revisions are billed hourly. But our concept phase is tight — most clients nail it in round 1 or 2.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What if I only need a logo?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">We can do a standalone logo project starting at $500. But honestly? A logo without a system is like a crown without a kingdom. We usually talk clients into at least the Starter package so their logo actually works everywhere.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">How long does it take?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Starter: 1–2 weeks. Brand System: 3–4 weeks. Total Package: 5–6 weeks. Timelines depend on feedback speed — the faster you respond, the faster we ship.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Can you redesign my existing brand?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Absolutely. Rebrands are our favorite. We audit what's working, scrap what's not, and evolve your identity without losing the recognition you've already built.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter fade-up">Let's Make You<br>Unforgettable.</h2>
+            <p class="text-xl text-black/60 mb-12 fade-up">Your competitors are forgettable. You don't have to be.</p>
+            <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] fade-up">Start a Design Project</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">Africa's leading tech agency. Building digital products that matter.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="webdesign.html" class="hover:text-white transition-colors">Web Design</a></li>
+                        <li><a href="softwaredevelopment.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="appdev.html" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="seo.html" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                     <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="../services.html" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="../academy.html" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="../blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="../contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <h3 class="text-2xl font-black mb-2">Start a Design Project</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your brand and we'll get back within 24 hours.</p>
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-1">Business Name</label><input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name"></div>
+                    <div><label class="block text-sm font-medium mb-1">What do you need?</label><select name="designNeed" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>Logo only</option><option>Full brand identity</option><option>Rebrand existing business</option><option>Marketing collateral</option><option>Not sure yet</option></select></div>
+                    <div><label class="block text-sm font-medium mb-1">Tell us about your brand vibe</label><textarea name="brandVibe" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="Modern? Playful? Luxury? Bold? Send reference links if you have them."></textarea></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium mb-1">Company Email</label><input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com"></div>
+                        <div><label class="block text-sm font-medium mb-1">Phone Number</label><input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234..."></div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2 flex items-center justify-center gap-2">
+    <span id="btnText">Submit Request</span>
+    <div id="btnSpinner" class="spinner hidden" style="width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;"></div>
+</button>
+                </form>
+            </div>
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Can't wait to design something iconic.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Firebase Config — SWAP THESE WITH YOUR REAL VALUES
+const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+
+let db;
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log("Firebase connected");
+} catch (e) {
+    console.log("Firebase not configured yet — form will log to console");
+}
+
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            if (window.innerWidth < 768) { mobileNav.classList.toggle('hidden'); return; }
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) { header.querySelector('.header-inner').classList.add('header-collapsed'); logo.classList.add('expanded'); }
+            else { header.querySelector('.header-inner').classList.remove('header-collapsed'); logo.classList.remove('expanded'); }
+        }
+        function toggleFaq(item) { document.querySelectorAll('.faq-item').forEach(el => { if (el !== item) el.classList.remove('open'); }); item.classList.toggle('open'); }
+        function openModal() { const modal = document.getElementById('projectModal'); const content = document.getElementById('modalContent'); modal.classList.remove('hidden'); setTimeout(() => { content.classList.remove('scale-95','opacity-0'); content.classList.add('scale-100','opacity-100'); }, 10); }
+        function closeModal() { const modal = document.getElementById('projectModal'); const content = document.getElementById('modalContent'); const success = document.getElementById('successCard'); content.classList.add('scale-95','opacity-0'); content.classList.remove('scale-100','opacity-100'); success.classList.add('scale-95','opacity-0','hidden'); success.classList.remove('scale-100','opacity-100'); setTimeout(() => { modal.classList.add('hidden'); document.getElementById('projectForm').reset(); }, 300); }
+async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form));
+    data.timestamp = new Date().toISOString();
+    data.status = "new";
+
+    // Optional: button loading state
+const btn = document.getElementById('submitBtn');
+const btnText = document.getElementById('btnText');
+const spinner = document.getElementById('btnSpinner');
+btn.disabled = true;
+btnText.textContent = 'Sending...';
+spinner.classList.remove('hidden');
+
+    try {
+        if (db) {
+            // CHANGE THIS COLLECTION NAME PER PAGE (see list below)
+            await db.collection('webDesignProjects').add(data);
+            console.log('Saved to Firebase:', data);
+        } else {
+            console.log('Firebase not ready, logged:', data);
+            await new Promise(r => setTimeout(r, 800)); // fake delay for demo
+        }
+
+        // Show success card
+        document.getElementById('modalContent').classList.add('hidden');
+        const success = document.getElementById('successCard');
+        success.classList.remove('hidden');
+        setTimeout(() => {
+            success.classList.remove('scale-95', 'opacity-0');
+            success.classList.add('scale-100', 'opacity-100');
+        }, 10);
+
+    } catch (error) {
+        console.error('Error saving:', error);
+        alert('Something went wrong. Please try again or email us directly.');
+        btn.disabled = false;
+btnText.textContent = 'Submit Request'; // or whatever your original text was
+spinner.classList.add('hidden');
+    }
+}
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => { gsap.fromTo(elem, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: elem, start: 'top 85%', toggleActions: 'play none none none' }, delay: i * 0.05 }); });
+        window.addEventListener('scroll', () => { const header = document.getElementById('mainHeader'); if (window.pageYOffset > 100) header.classList.add('shadow-sm'); else header.classList.remove('shadow-sm'); });
+    </script>
+</body>
+</html>

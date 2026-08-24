@@ -1,0 +1,19 @@
+ /* Header States */
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { 
+            transform: translateY(-100%); 
+            opacity: 0;
+            pointer-events: none;
+        }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            background: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }

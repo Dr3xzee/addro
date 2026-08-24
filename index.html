@@ -1,0 +1,773 @@
+
+.<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADDRO | The future of africa's tech</title>
+
+<!-- Standard Favicon & Google Search Icon -->
+<link rel="icon" type="image/jpeg" href="./logo.jpg">
+<link rel="shortcut icon" href="/logo.jpg">
+
+
+<!-- Apple Touch Icon (iPhones) -->
+<link rel="apple-touch-icon" sizes="180x180" href="/logo.jpg">
+
+<!-- Open Graph / Social Media Preview (WhatsApp, Twitter/X, LinkedIn) -->
+<meta property="og:title" content="ADDRO | The future of africa's tech">
+<meta property="og:image" content="https://addro.com.ng/logo.jpg">
+<meta property="og:type" content="website">
+<meta property="og:instagram" content="https://www.instagram.com/addrotech/">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        /* Grid Background */
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+        
+        /* Semi Circle */
+        .semi-circle {
+            width: 600px;
+            height: 300px;
+            background: #000;
+            border-radius: 300px 300px 0 0;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+        
+        /* Header States */
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { 
+            transform: translateY(-100%); 
+            opacity: 0;
+            pointer-events: none;
+        }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            background: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        /* Card Stack */
+        .card-stack {
+            perspective: 1000px;
+            height: 400px;
+            position: relative;
+        }
+        .stack-card {
+            position: absolute;
+            width: 280px;
+            height: 360px;
+            background: white;
+            border: 2px solid #000;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 4px 4px 0px #000;
+        }
+        .stack-card:nth-child(1) { transform: rotate(-8deg) translateX(-20px); z-index: 5; }
+        .stack-card:nth-child(2) { transform: rotate(-4deg) translateX(-10px); z-index: 4; }
+        .stack-card:nth-child(3) { transform: rotate(0deg); z-index: 3; }
+        .stack-card:nth-child(4) { transform: rotate(4deg) translateX(10px); z-index: 2; }
+        .stack-card:nth-child(5) { transform: rotate(8deg) translateX(20px); z-index: 1; }
+        
+                /* Hover only when stacked, dead silent when spread */
+        .card-stack:not(.spread) .stack-card:hover { 
+            transform: translateY(-10px) !important; 
+            box-shadow: 8px 12px 0px #000; 
+        }
+
+        /* Spread = horizontal scroll flex */
+        .card-stack.spread {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 24px;
+            overflow-x: auto;
+            padding: 20px 40px;
+            height: auto;
+            min-height: 400px;
+            cursor: default;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .card-stack.spread .stack-card {
+            position: relative;
+            transform: none !important;
+            flex-shrink: 0;
+            margin: 0;
+            scroll-snap-align: center;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.3);
+        }
+        
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+        
+        /* Animations */
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        .fade-in { opacity: 0; }
+        
+        /* Problem/Solution Table */
+        .ps-row {
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        .ps-row:hover { background: rgba(0,0,0,0.02); }
+        
+        /* Trust Strip Marquee */
+        .marquee-track {
+            display: flex;
+            animation: marquee 30s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        
+        /* Floating animation for hero man */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .float-anim { animation: float 4s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Dynamic Floating Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="#services" class="hover:opacity-60 transition-opacity">Services</a>
+                    <a href="./about.html" class="hover:opacity-60 transition-opacity">About</a>
+                </nav>
+                
+                <!-- Logo -->
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()">
+                    <h1 class="text-2xl font-black tracking-tighter">ADDRO</h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="#academy" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="#contact" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden p-2" onclick="toggleHeader()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Nav (hidden by default) -->
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="#services" onclick="toggleHeader()">Services</a>
+                <a href="./about.html" onclick="toggleHeader()">About</a>
+                <a href="#academy" onclick="toggleHeader()">Academy</a>
+                <a href="#contact" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden grid-bg">
+        <div class="text-center z-10 mb-auto mt-32">
+            <p class="text-sm font-medium tracking-widest uppercase mb-4 fade-up">Africa's Leading Tech Agency</p>
+            <h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 fade-up" style="animation-delay: 0.1s">
+                Welcome to<br>Addro Tech
+            </h1>
+            <p class="text-lg text-black/60 max-w-md mx-auto fade-up" style="animation-delay: 0.2s">
+                Building digital excellence across the continent
+            </p>
+        </div>
+        
+        <!-- Semi Circle & Man -->
+        <div class="relative w-full flex justify-center items-end mt-auto" style="height: 400px;">
+            <div class="semi-circle"></div>
+            <div class="relative z-10 float-anim mb-0">
+                <img src="hero.png" 
+                     alt="Smiling professional" 
+                     class="w-67 h-80 object-cover rounded-t-full mask-image-gradient"
+                     style="-webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); mask-image: linear-gradient(to bottom, black 80%, transparent 100%);">
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust Strip -->
+    <section class="py-8 border-y border-black/10 overflow-hidden bg-white">
+        <div class="max-w-7xl mx-auto px-6 mb-6 flex flex-wrap justify-center gap-8 md:gap-16 items-center text-center">
+            <div>
+                <p class="text-3xl font-black">30+</p>
+                <p class="text-xs uppercase tracking-wider text-black/60">Projects Delivered</p>
+            </div>
+            <div>
+                <p class="text-3xl font-black">20</p>
+                <p class="text-xs uppercase tracking-wider text-black/60">Businesses Launched Online</p>
+            </div>
+            <div>
+                <p class="text-3xl font-black">100%</p>
+                <p class="text-xs uppercase tracking-wider text-black/60">Client Retention</p>
+            </div>
+        </div>
+        
+        <!-- Logo Marquee -->
+        <div class="relative overflow-hidden py-4">
+            <div class="marquee-track whitespace-nowrap">
+                <div class="flex items-center gap-16 px-8">
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="addro.png" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/blissautos.png" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/unicore.png" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/lexto.png" width="50px" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/provaspace.jpeg" width="50px" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/spilly.png" width="50px" alt=""></div>
+                    <!-- <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold">BRAND 7</div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold">BRAND 8</div> -->
+                </div>
+                <div class="flex items-center gap-16 px-8">
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="addro.png" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/blissautos.png" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/unicore.png" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/lexto.png" width="50px" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/provaspace.jpeg" width="50px" alt=""></div>
+                    <div class="w-24 h-12 bg-black/5 rounded flex items-center justify-center text-xs font-bold"><img src="brands/spilly.png" width="50px" alt=""></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem / Solution Section -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center mb-16 tracking-tighter fade-up">The Problem &<br>Our Solution</h2>
+            
+            <div class="border-t-2 border-black">
+                <!-- Row 1 -->
+                <div class="ps-row grid md:grid-cols-2 gap-8 py-10 fade-up">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm font-bold">1</span>
+                            <h3 class="text-xl font-bold">Unclear Scope</h3>
+                        </div>
+                        <p class="text-black/60 leading-relaxed pl-11">
+                            Agencies frequently start a project without the full scope of the business, leading to mismatched expectations and costly revisions down the line.
+                        </p>
+                    </div>
+                    <div class="md:border-l md:border-black/10 md:pl-8">
+                        <div class="bg-black text-white p-6 rounded-2xl">
+                            <h4 class="font-bold mb-2">The Addro Way</h4>
+                            <p class="text-white/80 text-sm leading-relaxed">
+                                We don't just jump into a project. We hear about the client's perspective, put ourselves in their shoes, and make sure we fully understand every aspect before writing a single line of code.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Row 2 -->
+                <div class="ps-row grid md:grid-cols-2 gap-8 py-10 fade-up">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm font-bold">2</span>
+                            <h3 class="text-xl font-bold">Poor Response Time</h3>
+                        </div>
+                        <p class="text-black/60 leading-relaxed pl-11">
+                            Most African tech agencies take a long time to reply and have irregular update schedules, leaving clients in the dark about their own projects.
+                        </p>
+                    </div>
+                    <div class="md:border-l md:border-black/10 md:pl-8">
+                        <div class="bg-black text-white p-6 rounded-2xl">
+                            <h4 class="font-bold mb-2">The Addro Way</h4>
+                            <p class="text-white/80 text-sm leading-relaxed">
+                                Addro changes the game with steady replies and constant updates on every part of the project. You're never left wondering what's happening.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Row 3 -->
+                <div class="ps-row grid md:grid-cols-2 gap-8 py-10 fade-up">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm font-bold">3</span>
+                            <h3 class="text-xl font-bold">Low Code Quality</h3>
+                        </div>
+                        <p class="text-black/60 leading-relaxed pl-11">
+                            Most tech agencies deliver software that lacks modern-day scalability, security, or proper documentation — creating problems for future growth.
+                        </p>
+                    </div>
+                    <div class="md:border-l md:border-black/10 md:pl-8">
+                        <div class="bg-black text-white p-6 rounded-2xl">
+                            <h4 class="font-bold mb-2">The Addro Way</h4>
+                            <p class="text-white/80 text-sm leading-relaxed">
+                                We use top-notch software architecture that can take you loads of years without failures. Scalable, secure, and well-documented from day one.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Row 4 -->
+                <div class="ps-row grid md:grid-cols-2 gap-8 py-10 fade-up">
+                    <div>
+                        <div class="flex items-center gap-3 mb-3">
+                            <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-sm font-bold">4</span>
+                            <h3 class="text-xl font-bold">The Disappearing Act</h3>
+                        </div>
+                        <p class="text-black/60 leading-relaxed pl-11">
+                            This is a common issue with most African tech agencies — payment made and just like that, they're gone. No support, no maintenance, no accountability.
+                        </p>
+                    </div>
+                    <div class="md:border-l md:border-black/10 md:pl-8">
+                        <div class="bg-black text-white p-6 rounded-2xl">
+                            <h4 class="font-bold mb-2">The Addro Way</h4>
+                            <p class="text-white/80 text-sm leading-relaxed">
+                                Here at Addro we stay with our clients, constantly checking up on them and making sure that their business is still up and running. We're partners, not vendors.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Preview - Card Stack -->
+    <section id="services" class="py-24 bg-neutral-50 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl md:text-5xl font-black text-center mb-4 tracking-tighter fade-up">Our Services</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Click the stack to explore</p>
+            
+            <div class="flex justify-center items-center min-h-[500px] relative" id="cardStackContainer">
+                <div class="card-stack" id="cardStack" onclick="spreadCards(event)">
+                    <div class="stack-card" onclick="goToService(event, 'web-dev')">
+                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=300&fit=crop" class="w-full h-40 object-cover border-b-2 border-black" alt="Web Development">
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg mb-2">Web Development</h3>
+                            <p class="text-sm text-black/60">Custom websites and web apps built for scale and performance.</p>
+                        </div>
+                    </div>
+                    <div class="stack-card" onclick="goToService(event, 'mobile')">
+                        <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=400&h=300&fit=crop" class="w-full h-40 object-cover border-b-2 border-black" alt="Mobile Apps">
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg mb-2">Mobile Apps</h3>
+                            <p class="text-sm text-black/60">Native and cross-platform mobile applications.</p>
+                        </div>
+                    </div>
+                    <div class="stack-card" onclick="goToService(event, 'branding')">
+                        <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop" class="w-full h-40 object-cover border-b-2 border-black" alt="Branding">
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg mb-2">Branding</h3>
+                            <p class="text-sm text-black/60">Identity design that tells your story right.</p>
+                        </div>
+                    </div>
+                    <div class="stack-card" onclick="goToService(event, 'seo')">
+                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop" class="w-full h-40 object-cover border-b-2 border-black" alt="SEO">
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg mb-2">SEO & Marketing</h3>
+                            <p class="text-sm text-black/60">Get found. Get leads. Get growing.</p>
+                        </div>
+                    </div>
+                    <div class="stack-card" onclick="goToService(event, 'consulting')">
+                        <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=400&h=300&fit=crop" class="w-full h-40 object-cover border-b-2 border-black" alt="Consulting">
+                        <div class="p-5">
+                            <h3 class="font-bold text-lg mb-2">Tech Consulting</h3>
+                            <p class="text-sm text-black/60">Strategic guidance for your digital transformation.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="text-center text-sm text-black/40 mt-8">Click outside to stack back</p>
+        </div>
+    </section>
+
+    <!-- Featured Work -->
+    <section id="work" class="py-24 px-6 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center mb-16 tracking-tighter fade-up">Featured Work</h2>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Case Study 1 -->
+                <article class="group fade-up">
+                    <div class="relative overflow-hidden rounded-2xl border-2 border-black mb-4 bg-neutral-100">
+                        <img src="projects/lexto.png" alt="Project 1" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Lexto</h3>
+                    <p class="text-black/60 text-sm mb-4 leading-relaxed">LEXTO connects people who want things done with people who want to earn. Complete tasks, boost your brand, or get actions done — all in one place.</p>
+                    <a href="https://lexto.com.ng" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">View Live Site →</a>
+                </article>
+                
+                <!-- Case Study 2 -->
+                <article class="group fade-up">
+                    <div class="relative overflow-hidden rounded-2xl border-2 border-black mb-4 bg-neutral-100">
+                        <img src="projects/unicore.png" alt="Project 2" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Unicore</h3>
+                    <p class="text-black/60 text-sm mb-4 leading-relaxed">UNICORE is a student marketplace that connects student sellers to student buyers , perfectly optimised to counter network issues</p>
+                    <a href="https://unicore.name.ng" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">View Live Site →</a>
+                </article>
+                
+                <!-- Case Study 3 -->
+                <article class="group fade-up">
+                    <div class="relative overflow-hidden rounded-2xl border-2 border-black mb-4 bg-neutral-100">
+                        <img src="projects/thynx.png" alt="Project 3" class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300"></div>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Thynx SAAS landing page</h3>
+                    <p class="text-black/60 text-sm mb-4 leading-relaxed">THYNX is an AI-augmented workspace designed to bridge the gap between messy thoughts and actionable brilliance.</p>
+                    <a href="https://thynxx.netlify.app" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">View Live Site →</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Academy Teaser -->
+    <section id="academy" class="py-24 px-6 bg-black text-white">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-4xl md:text-6xl font-black mb-6 tracking-tighter fade-up">Addro Academy</h2>
+            <p class="text-white/60 text-lg max-w-2xl mx-auto mb-12 fade-up">
+                We're not just building products — we're building people. Join our academy and master the skills that power Africa's digital economy.
+            </p>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+                <div class="border border-white/20 rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="#000000" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M21 17V6c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v11c0 .37.11.7.28 1H2v2h20v-2h-1.28c.17-.3.28-.63.28-1M5 6h14v11-1H5z"></path>
+</svg></div>
+                    <h4 class="font-bold">Software Dev</h4>
+                </div>
+                <div class="border border-white/20 rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="#000000" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M13.4 2.1c-3.16-.43-6.24.6-8.47 2.83S1.67 10.25 2.1 13.4c.53 3.89 3.46 7.21 7.29 8.25.86.23 1.74.35 2.62.35h.14c1.03-.02 1.97-.55 2.52-1.43.54-.88.6-1.95.15-2.88l-.2-.42c-.45-.94-.1-1.8.39-2.28s1.34-.84 2.28-.39l.41.2c.93.45 2 .39 2.88-.15a3 3 0 0 0 1.43-2.52c.01-.92-.1-1.85-.35-2.76-1.04-3.83-4.35-6.75-8.25-7.29Zm6.12 10.86c-.3.18-.65.2-.96.05l-.41-.2a3.96 3.96 0 0 0-4.56.78 3.96 3.96 0 0 0-.78 4.56l.2.42c.15.31.13.66-.05.96-.19.3-.49.47-.84.48-.74.02-1.48-.08-2.21-.28-3.06-.83-5.4-3.48-5.83-6.59-.34-2.53.48-5 2.27-6.79a7.96 7.96 0 0 1 5.66-2.34c.37 0 .75.03 1.13.08 3.11.42 5.75 2.76 6.59 5.83.2.73.29 1.47.28 2.21 0 .35-.18.66-.48.84Z"></path><path d="M7.33 12.76a1 1 0 1 0 0 2 1 1 0 1 0 0-2m.07-3.83a1.12 1.12 0 1 0 0 2.24 1.12 1.12 0 1 0 0-2.24m2.81-2.87a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 1 0 0-2.5m4.06.11a1.38 1.38 0 1 0 0 2.76 1.38 1.38 0 1 0 0-2.76"></path>
+</svg></div>
+                    <h4 class="font-bold">Graphic Design</h4>
+                </div>
+                <div class="border border-white/20 rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="#000000" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M3 15h2v6H3zm4-2h2v8H7zm4-1h2v9h-2zm4 1h2v8h-2zm4-5h2v13h-2z"></path><path d="m19.21 2.38-4.87 6.21-5-4-6.13 7.79 1.58 1.24 4.87-6.21 5 4 6.13-7.79z"></path>
+</svg></div>
+                    <h4 class="font-bold">SEO Integration</h4>
+                </div>
+                <div class="border border-white/20 rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center mx-auto mb-4 text-xl"><svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="#000000" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M18 11c0-.96-.68-1.76-1.58-1.95.36-.6.58-1.3.58-2.05 0-2.21-1.79-4-4-4-1.52 0-2.82.86-3.5 2.1C8.82 3.85 7.52 3 6 3 3.79 3 2 4.79 2 7c0 .9.31 1.73.82 2.4-.49.36-.82.95-.82 1.6v8c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-2.5l4 2v-7l-4 2zm-5-6c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2M6 5c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2M4 19v-8h12v8z"></path>
+</svg></div>
+                    <h4 class="font-bold">Photo/Video Editing</h4>
+                </div>
+            </div>
+            
+            <a href="#" class="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform fade-up">
+                Explore the Academy →
+            </a>
+        </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section id="contact" class="py-32 px-6 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-8 tracking-tighter fade-up">Need a Digital Boost?</h2>
+            <p class="text-xl text-black/60 mb-12 fade-up">Let's turn your vision into a digital reality.</p>
+            <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] fade-up">
+                Start a Project
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">
+                        Africa's leading tech agency. Building digital products that matter.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Branding</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#work" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="#academy" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#contact" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="https://cbtzone.name.ng" class="hover:text-white transition-colors">Jambsnest</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                
+                <h3 class="text-2xl font-black mb-2">Start a Project</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your business and we'll get back to you within 24 hours.</p>
+                
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Name</label>
+                        <input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Scope</label>
+                        <textarea name="businessScope" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="What does your business do?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Company Logo (Optional)</label>
+                        <input type="file" name="logo" accept="image/*" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-black/80">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Company Email</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Phone Number</label>
+                            <input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234...">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2">
+                        Submit Project Request
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Success Card -->
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Looking forward to building something great together.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config Placeholder
+       const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+        // Initialize Firebase here when ready: firebase.initializeApp(firebaseConfig);
+
+        // Header Toggle
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            
+            if (window.innerWidth < 768) {
+                mobileNav.classList.toggle('hidden');
+                return;
+            }
+            
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) {
+                header.querySelector('.header-inner').classList.add('header-collapsed');
+                logo.classList.add('expanded');
+            } else {
+                header.querySelector('.header-inner').classList.remove('header-collapsed');
+                logo.classList.remove('expanded');
+            }
+        }
+
+        // Card Stack Logic
+        function spreadCards(e) {
+            e.stopPropagation();
+            const stack = document.getElementById('cardStack');
+            stack.classList.toggle('spread');
+        }
+
+        function goToService(e, service) {
+    e.stopPropagation();
+    const stack = document.getElementById('cardStack');
+    
+    // If cards are still stacked, spread them first — don't navigate yet
+    if (!stack.classList.contains('spread')) {
+        stack.classList.add('spread');
+        return;
+    }
+    
+    // Only navigate when already spread out
+    console.log('Navigating to:', service);
+    window.location.href = `./services.html`;  // <-- your real link here
+    // alert(`Navigating to ${service} page...`);
+}
+
+        // Click outside to collapse cards
+        document.addEventListener('click', (e) => {
+            const stack = document.getElementById('cardStack');
+            const container = document.getElementById('cardStackContainer');
+            if (stack.classList.contains('spread') && !container.contains(e.target)) {
+                stack.classList.remove('spread');
+            }
+        });
+
+        // Modal Logic
+        function openModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            const success = document.getElementById('successCard');
+            
+            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            success.classList.add('scale-95', 'opacity-0', 'hidden');
+            success.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('projectForm').reset();
+            }, 300);
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            // Firebase submission would go here
+            // db.collection('projects').add({...})
+            
+            console.log('Form Data:', Object.fromEntries(formData));
+            
+            // Show success
+            document.getElementById('modalContent').classList.add('hidden');
+            const success = document.getElementById('successCard');
+            success.classList.remove('hidden');
+            setTimeout(() => {
+                success.classList.remove('scale-95', 'opacity-0');
+                success.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // GSAP Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => {
+            gsap.fromTo(elem, 
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: 'top 85%',
+                        toggleActions: 'play none none none'
+                    },
+                    delay: i * 0.05
+                }
+            );
+        });
+
+        // Header scroll behavior
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const header = document.getElementById('mainHeader');
+            
+            if (currentScroll > 100) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+            
+            lastScroll = currentScroll;
+        });
+    </script>
+</body>
+</html>

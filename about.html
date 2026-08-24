@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | ADDRO — The Story Behind Africa's Leading Tech Agency</title>
+    <meta name="description" content="Discover why Addro exists, the problem we saw in the African tech market, and how we're building digital excellence across the continent.">
+
+    <!-- Standard Favicon -->
+    <link rel="icon" type="image/jpeg" href="/logo.jpg">
+    <link rel="shortcut icon" href="/logo.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.jpg">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="About Us | ADDRO">
+    <meta property="og:description" content="The story behind Africa's leading tech agency. Built on trust. Driven by excellence.">
+    <meta property="og:image" content="https://addro.com.ng/logo.jpg">
+    <meta property="og:type" content="website">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+
+        /* Grid Background */
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image:
+                linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+
+        /* Header States */
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed {
+            transform: translateY(-100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            background: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        /* Smooth Scroll */
+        html { scroll-behavior: smooth; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+
+        /* Animation Utilities */
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        .fade-in { opacity: 0; }
+        .scale-in { opacity: 0; transform: scale(0.95); }
+
+        /* Journey Path */
+        .journey-path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+
+        /* Value Cards */
+        .value-card {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .value-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 8px 12px 0px #000;
+        }
+
+        /* Team Cards */
+        .team-card img {
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            filter: grayscale(100%);
+        }
+        .team-card:hover img {
+            transform: scale(1.05);
+            filter: grayscale(0%);
+        }
+
+        /* Quote Marks */
+        .quote-mark {
+            font-size: 8rem;
+            line-height: 1;
+            opacity: 0.1;
+            position: absolute;
+            top: -1rem;
+            left: -1rem;
+            font-family: Georgia, serif;
+        }
+
+        /* Marquee */
+        .marquee-track {
+            display: flex;
+            animation: marquee 30s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        /* Modal */
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* Diagonal clip for hero */
+        .diagonal-clip {
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+
+        /* Large background text */
+        .bg-text {
+            font-size: clamp(6rem, 15vw, 14rem);
+            font-weight: 900;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(0,0,0,0.08);
+            line-height: 0.85;
+            user-select: none;
+            position: absolute;
+            white-space: nowrap;
+            z-index: 0;
+        }
+
+        /* Pulse ring */
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+        }
+    </style>
+<base target="_blank">
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Dynamic Floating Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="/services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                    <a href="/index.html#work" class="hover:opacity-60 transition-opacity">Work</a>
+                </nav>
+
+                <!-- Logo -->
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()">
+                    <h1 class="text-2xl font-black tracking-tighter">ADDRO</h1>
+                </div>
+
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="/index.html#academy" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="/index.html#contact" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+
+                <!-- Mobile Menu Button -->
+                <button class="md:hidden p-2" onclick="toggleHeader()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Nav -->
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="/services.html" onclick="toggleHeader()">Services</a>
+                <a href="/index.html#work" onclick="toggleHeader()">Work</a>
+                <a href="/index.html#academy" onclick="toggleHeader()">Academy</a>
+                <a href="/index.html#contact" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section — Manifesto -->
+    <section class="relative min-h-screen flex flex-col items-center justify-center pt-20 overflow-hidden grid-bg">
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span class="bg-text">TRUST</span>
+        </div>
+
+        <div class="text-center z-10 max-w-5xl mx-auto px-6 mb-auto mt-32">
+            <p class="text-sm font-medium tracking-widest uppercase mb-6 fade-up">Our Story</p>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 fade-up leading-[0.95]" style="animation-delay: 0.1s">
+                We didn't start<br>Addro to be<br><span class="relative inline-block">
+                    another agency
+                    <svg class="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 200 8" fill="none"><path d="M2 6C50 2 150 2 198 6" stroke="#000" stroke-width="3" stroke-linecap="round"/></svg>
+                </span>
+            </h1>
+            <p class="text-lg md:text-xl text-black/60 max-w-2xl mx-auto fade-up leading-relaxed" style="animation-delay: 0.2s">
+                We started it because we were tired of watching African businesses get burned by the very people meant to lift them up.
+            </p>
+        </div>
+
+        <!-- Scroll Indicator -->
+        <div class="mb-12 flex flex-col items-center gap-2 fade-up" style="animation-delay: 0.4s">
+            <span class="text-xs uppercase tracking-widest text-black/40">Scroll to read</span>
+            <div class="w-6 h-10 border-2 border-black rounded-full flex justify-center pt-2">
+                <div class="w-1.5 h-1.5 bg-black rounded-full animate-bounce"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Spark — Founder Story -->
+    <section class="py-24 md:py-32 px-6 bg-white relative overflow-hidden">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <!-- Left: Story -->
+                <div class="fade-up">
+                    <div class="inline-flex items-center gap-2 bg-black text-white px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider mb-8">
+                        <span class="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        The Spark
+                    </div>
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-8 leading-tight">
+                        We saw a continent full of dreamers being let down by broken promises.
+                    </h2>
+                    <div class="space-y-6 text-black/70 leading-relaxed text-lg">
+                        <p>
+                            Addro was born from frustration. The kind that keeps you up at night. We watched African entrepreneurs — brilliant, ambitious, hardworking — hand over their savings to tech agencies that treated them like transactions, not partners.
+                        </p>
+                        <p>
+                            Projects started without understanding the business. Emails went unanswered for weeks. Codebases were built like sandcastles — beautiful until the first wave hit. And worst of all, the <strong>disappearing act</strong>: payment made, agency gone. No support. No maintenance. No accountability.
+                        </p>
+                        <p class="text-black font-medium">
+                            We knew Africa deserved better. So we built it.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Right: Visual Timeline -->
+                <div class="relative fade-up" style="animation-delay: 0.2s">
+                    <div class="relative border-2 border-black rounded-3xl p-8 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        <!-- Timeline Items -->
+                        <div class="relative pl-8 border-l-2 border-black/10 space-y-10">
+                            <!-- Node 1 -->
+                            <div class="relative">
+                                <div class="absolute -left-[41px] top-1 w-5 h-5 bg-black rounded-full border-4 border-white"></div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-black/40 mb-1">The Observation</p>
+                                <p class="font-bold text-lg">African businesses were being underserved by local tech agencies.</p>
+                            </div>
+                            <!-- Node 2 -->
+                            <div class="relative">
+                                <div class="absolute -left-[41px] top-1 w-5 h-5 bg-black rounded-full border-4 border-white"></div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-black/40 mb-1">The Frustration</p>
+                                <p class="font-bold text-lg">Poor code, zero communication, and agencies that vanish after payday.</p>
+                            </div>
+                            <!-- Node 3 -->
+                            <div class="relative">
+                                <div class="absolute -left-[41px] top-1 w-5 h-5 bg-black rounded-full border-4 border-white"></div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-black/40 mb-1">The Decision</p>
+                                <p class="font-bold text-lg">Build an agency that treats every client like a true partner.</p>
+                            </div>
+                            <!-- Node 4 -->
+                            <div class="relative">
+                                <div class="absolute -left-[41px] top-1 w-5 h-5 bg-white rounded-full border-4 border-black"></div>
+                                <p class="text-xs font-bold uppercase tracking-wider text-black/40 mb-1">The Result</p>
+                                <p class="font-bold text-lg">Addro — 30+ projects, 20 businesses launched, 100% retention.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Decorative element -->
+                    <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-neutral-100 rounded-2xl -z-10 border-2 border-black/5"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Vision — Cinematic Section -->
+    <section class="py-32 md:py-40 px-6 bg-black text-white relative overflow-hidden">
+        <!-- Background Grid for dark section -->
+        <div class="absolute inset-0 opacity-10" style="background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);"></div>
+
+        <div class="max-w-6xl mx-auto relative z-10">
+            <!-- Mission -->
+            <div class="mb-24 fade-up">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-px bg-white/20 flex-1"></div>
+                    <span class="text-xs font-bold uppercase tracking-[0.3em] text-white/50">Our Mission</span>
+                    <div class="h-px bg-white/20 flex-1"></div>
+                </div>
+                <h2 class="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-center leading-[1.1]">
+                    To redefine what African<br>tech agencies <span class="text-white/40">can deliver.</span>
+                </h2>
+                <p class="text-white/60 text-lg md:text-xl text-center max-w-3xl mx-auto mt-8 leading-relaxed">
+                    World-class digital products, built with integrity. No shortcuts. No disappearances. Just relentless excellence and partnerships that last.
+                </p>
+            </div>
+
+            <!-- Vision -->
+            <div class="fade-up" style="animation-delay: 0.15s">
+                <div class="flex items-center gap-4 mb-8">
+                    <div class="h-px bg-white/20 flex-1"></div>
+                    <span class="text-xs font-bold uppercase tracking-[0.3em] text-white/50">Our Vision</span>
+                    <div class="h-px bg-white/20 flex-1"></div>
+                </div>
+                <h2 class="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter text-center leading-[1.1]">
+                    An Africa where every<br>business has access to<br><span class="relative inline-block">
+                        elite digital infrastructure
+                        <svg class="absolute -bottom-3 left-0 w-full" height="10" viewBox="0 0 400 10" fill="none"><path d="M4 5C100 2 300 2 396 5" stroke="rgba(255,255,255,0.3)" stroke-width="4" stroke-linecap="round"/></svg>
+                    </span>
+                </h2>
+                <p class="text-white/60 text-lg md:text-xl text-center max-w-3xl mx-auto mt-8 leading-relaxed">
+                    We believe geography should never limit quality. Whether you're in Lagos, Nairobi, or Accra, you deserve the same caliber of technology that powers Silicon Valley.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="py-24 md:py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-black to-transparent opacity-5"></div>
+
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center mb-16 fade-up">
+                <p class="text-xs font-bold uppercase tracking-[0.3em] text-black/40 mb-4">What We Stand For</p>
+                <h2 class="text-4xl md:text-6xl font-black tracking-tighter">Our Values</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Value 1 -->
+                <div class="value-card bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Partnership First</h3>
+                    <p class="text-black/60 text-sm leading-relaxed">
+                        We don't do vendor relationships. We become an extension of your team — invested in your success as if it were our own.
+                    </p>
+                </div>
+
+                <!-- Value 2 -->
+                <div class="value-card bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up" style="animation-delay: 0.1s">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Radical Transparency</h3>
+                    <p class="text-black/60 text-sm leading-relaxed">
+                        Steady updates. Clear timelines. No hidden fees. You'll never wonder what's happening with your project — because we'll tell you before you ask.
+                    </p>
+                </div>
+
+                <!-- Value 3 -->
+                <div class="value-card bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up" style="animation-delay: 0.2s">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Architectural Excellence</h3>
+                    <p class="text-black/60 text-sm leading-relaxed">
+                        Scalable, secure, well-documented code built to last years. We don't just ship fast — we ship right.
+                    </p>
+                </div>
+
+                <!-- Value 4 -->
+                <div class="value-card bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up" style="animation-delay: 0.3s">
+                    <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">People Over Profit</h3>
+                    <p class="text-black/60 text-sm leading-relaxed">
+                        We check on our clients long after launch. Your business staying up and running matters more than our invoice getting paid.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="py-24 md:py-32 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 fade-up">
+                <p class="text-xs font-bold uppercase tracking-[0.3em] text-black/40 mb-4">The Minds Behind</p>
+                <h2 class="text-4xl md:text-6xl font-black tracking-tighter mb-4">Meet the Team</h2>
+                <p class="text-black/60 max-w-xl mx-auto">Small team. Giant impact. Every person here is obsessed with building things that matter.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Founder -->
+                <div class="team-card group fade-up">
+                    <div class="relative border-2 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-5 bg-neutral-100">
+                        <img src="./about/ceo.jpeg" alt="Founder" class="w-full h-80 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                            <p class="text-white font-bold text-lg">Founder & Lead</p>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold">Derek Obidu</h3>
+                    <p class="text-black/50 text-sm mt-1">Founder & CEO</p>
+                    <p class="text-black/60 text-sm mt-3 leading-relaxed">
+                        Built Addro from a frustration into a movement. Obsessed with code quality, client relationships, and proving that African tech can compete globally.
+                    </p>
+                </div>
+
+                <!-- Team Member 2 -->
+                <div class="team-card group fade-up" style="animation-delay: 0.1s">
+                    <div class="relative border-2 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-5 bg-neutral-100">
+                        <img src="./about/ella.jpg" alt="Team Member" class="w-full h-80 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                            <p class="text-white font-bold text-lg">visual editor</p>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold">Ella</h3>
+                    <p class="text-black/50 text-sm mt-1">Lead visual editor / social media manager</p>
+                    <p class="text-black/60 text-sm mt-3 leading-relaxed">
+                        Strategic partner in high-end visuals development. Ella keeps us on track with the real world and helps us raise our influence , her video and photo editing skills are seamless.
+                    </p>
+                </div>
+
+                <!-- Team Member 3 -->
+                <div class="team-card group fade-up" style="animation-delay: 0.2s">
+                    <div class="relative border-2 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-5 bg-neutral-100">
+                        <img src="./about/adams.jpeg" alt="Team Member" class="w-full h-80 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                            <p class="text-white font-bold text-lg">Mobile GFX Designer</p>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold">Adams</h3>
+                    <p class="text-black/50 text-sm mt-1">Lead Mobile GFX Designer / community engagement manager</p>
+                    <p class="text-black/60 text-sm mt-3 leading-relaxed">
+                        The bridge between brand identity and community impact. Adams specializes in high-end mobile graphics and visual storytelling, ensuring the Addro aesthetic is not just seen, but felt across our global ecosystem.
+                    </p>
+                </div>
+
+                 <!-- Team Member 4 -->
+                <div class="team-card group fade-up" style="animation-delay: 0.2s">
+                    <div class="relative border-2 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-5 bg-neutral-100">
+                        <img src="./about/daniel.jpg" alt="Team Member" class="w-full h-80 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                            <p class="text-white font-bold text-lg">GFX Designer</p>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold">Daniel</h3>
+                    <p class="text-black/50 text-sm mt-1">Lead GFX Designer / product manager</p>
+                    <p class="text-black/60 text-sm mt-3 leading-relaxed">
+                        The engine behind the Addro product lifecycle. Daniel merges the rigorous logic of product management with high-fidelity desktop design, ensuring that every system we deploy is as functional as it is visually commanding.
+                    </p>
+                </div>
+
+                 <!-- Team Member 5 -->
+                <div class="team-card group fade-up" style="animation-delay: 0.2s">
+                    <div class="relative border-2 border-black rounded-2xl overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-5 bg-neutral-100">
+                        <img src="./about/sam.jpeg" alt="Team Member" class="w-full h-80 object-cover">
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                            <p class="text-white font-bold text-lg">Content / script writer</p>
+                        </div>
+                    </div>
+                    <h3 class="text-xl font-bold">Samuel </h3>
+                    <p class="text-black/50 text-sm mt-1">content / script writer - creative and marketing department</p>
+                    <p class="text-black/60 text-sm mt-3 leading-relaxed">
+                        To translate complex technical innovations, software products, and agency milestones into compelling, high-converting narratives that captivate audiences across web, social, and video platforms.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trust By Numbers — Reinforcement -->
+    <section class="py-20 px-6 bg-black text-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12 text-center">
+                <div class="fade-up">
+                    <p class="text-5xl md:text-6xl font-black tracking-tighter mb-2">30+</p>
+                    <p class="text-white/50 text-sm uppercase tracking-wider">Projects Delivered</p>
+                </div>
+                <div class="fade-up" style="animation-delay: 0.1s">
+                    <p class="text-5xl md:text-6xl font-black tracking-tighter mb-2">20</p>
+                    <p class="text-white/50 text-sm uppercase tracking-wider">Businesses Launched</p>
+                </div>
+                <div class="fade-up" style="animation-delay: 0.2s">
+                    <p class="text-5xl md:text-6xl font-black tracking-tighter mb-2">100%</p>
+                    <p class="text-white/50 text-sm uppercase tracking-wider">Client Retention</p>
+                </div>
+                <div class="fade-up" style="animation-delay: 0.3s">
+                    <p class="text-5xl md:text-6xl font-black tracking-tighter mb-2">24h</p>
+                    <p class="text-white/50 text-sm uppercase tracking-wider">Avg. Response Time</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quote / Belief Section -->
+    <section class="py-24 md:py-32 px-6 bg-white relative overflow-hidden">
+        <div class="max-w-4xl mx-auto text-center relative fade-up">
+            <span class="quote-mark">"</span>
+            <blockquote class="text-3xl md:text-5xl font-black tracking-tighter leading-tight relative z-10">
+                We don't just build websites.<br>We build <span class="relative inline-block">confidence<svg class="absolute -bottom-2 left-0 w-full" height="6" viewBox="0 0 200 6" fill="none"><path d="M2 3C50 1 150 1 198 3" stroke="#000" stroke-width="4" stroke-linecap="round"/></svg></span> in African businesses.
+            </blockquote>
+            <p class="mt-8 text-black/50 font-medium">— The Addro Team</p>
+        </div>
+    </section>
+
+    <!-- CTA Banner — Not a Dead End -->
+    <section class="py-24 md:py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="text-center mb-16 fade-up">
+                <h2 class="text-4xl md:text-6xl font-black tracking-tighter mb-4">What's Next?</h2>
+                <p class="text-black/60 text-lg max-w-xl mx-auto">This page isn't a dead end. Here's where you can go from here.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <!-- Link to Work -->
+                <a href="/index.html#work" class="group block bg-white border-2 border-black rounded-3xl p-10 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] transition-all hover:-translate-y-1 fade-up">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="w-14 h-14 bg-black text-white rounded-2xl flex items-center justify-center">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                        </div>
+                        <svg class="w-6 h-6 text-black/30 group-hover:text-black group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">See Our Work</h3>
+                    <p class="text-black/60">Browse 30+ projects we've shipped for businesses across Africa. Real results, real products.</p>
+                </a>
+
+                <!-- Link to Services -->
+                <a href="/services.html" class="group block bg-black text-white border-2 border-black rounded-3xl p-10 shadow-[6px_6px_0px_0px_rgba(0,0,0,0.3)] hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,0.4)] transition-all hover:-translate-y-1 fade-up" style="animation-delay: 0.1s">
+                    <div class="flex items-start justify-between mb-6">
+                        <div class="w-14 h-14 bg-white text-black rounded-2xl flex items-center justify-center">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                        </div>
+                        <svg class="w-6 h-6 text-white/50 group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Explore Services</h3>
+                    <p class="text-white/70">From web development to branding — see exactly how we can help you build, launch, and scale.</p>
+                </a>
+            </div>
+
+            <!-- Direct CTA -->
+            <div class="text-center mt-16 fade-up" style="animation-delay: 0.2s">
+                <p class="text-black/40 mb-4">Ready to trust us with your vision?</p>
+                <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)]">
+                    Start a Project
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer — Identical to Homepage -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">
+                        Africa's leading tech agency. Building digital products that matter.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="/services.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="/services.html" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="/services.html" class="hover:text-white transition-colors">Branding</a></li>
+                        <li><a href="/services.html" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="/index.html#work" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="/index.html#academy" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="/index.html#contact" class="hover:text-white transition-colors">Contact</a></li>
+                        <li><a href="/about.html" class="hover:text-white transition-colors">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Project Modal — Identical to Homepage -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+
+                <h3 class="text-2xl font-black mb-2">Start a Project</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your business and we'll get back to you within 24 hours.</p>
+
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Name</label>
+                        <input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Scope</label>
+                        <textarea name="businessScope" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="What does your business do?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Company Logo (Optional)</label>
+                        <input type="file" name="logo" accept="image/*" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-black/80">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Company Email</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Phone Number</label>
+                            <input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234...">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2">
+                        Submit Project Request
+                    </button>
+                </form>
+            </div>
+
+            <!-- Success Card -->
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Looking forward to building something great together.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Header Toggle — Identical to Homepage
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+
+            if (window.innerWidth < 768) {
+                mobileNav.classList.toggle('hidden');
+                return;
+            }
+
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) {
+                header.querySelector('.header-inner').classList.add('header-collapsed');
+                logo.classList.add('expanded');
+            } else {
+                header.querySelector('.header-inner').classList.remove('header-collapsed');
+                logo.classList.remove('expanded');
+            }
+        }
+
+        // Modal Logic — Identical to Homepage
+        function openModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            const success = document.getElementById('successCard');
+
+            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            success.classList.add('scale-95', 'opacity-0', 'hidden');
+            success.classList.remove('scale-100', 'opacity-100');
+
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('projectForm').reset();
+            }, 300);
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            console.log('Form Data:', Object.fromEntries(formData));
+
+            document.getElementById('modalContent').classList.add('hidden');
+            const success = document.getElementById('successCard');
+            success.classList.remove('hidden');
+            setTimeout(() => {
+                success.classList.remove('scale-95', 'opacity-0');
+                success.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // GSAP Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => {
+            gsap.fromTo(elem,
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: 'top 85%',
+                        toggleActions: 'play none none none'
+                    },
+                    delay: i * 0.05
+                }
+            );
+        });
+
+        // Header scroll behavior
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const currentScroll = window.pageYOffset;
+            const header = document.getElementById('mainHeader');
+
+            if (currentScroll > 100) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+
+            lastScroll = currentScroll;
+        });
+    </script>
+</body>
+</html>

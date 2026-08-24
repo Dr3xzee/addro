@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services — Addro Tech Agency</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+        
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { 
+            transform: translateY(-100%); 
+            opacity: 0;
+            pointer-events: none;
+        }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            background: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .service-card {
+            border: 2px solid #000;
+            border-radius: 20px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 4px 4px 0px #000;
+        }
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 8px 12px 0px #000;
+        }
+        
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        
+        /* AI Chat UI */
+        .ai-bubble {
+            position: relative;
+            background: #000;
+            color: white;
+            border-radius: 20px;
+            border-bottom-left-radius: 4px;
+        }
+        .user-bubble {
+            position: relative;
+            background: #f3f3f3;
+            color: #000;
+            border-radius: 20px;
+            border-bottom-right-radius: 4px;
+        }
+        .typing-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite ease-in-out both;
+        }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+        
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Header (Same as Home) -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="index.html" class="hover:opacity-60 transition-opacity">Home</a>
+                    <a href="#services" class="hover:opacity-60 transition-opacity">Services</a>
+                </nav>
+                
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()">
+                    <h1 class="text-2xl font-black tracking-tighter">ADDRO</h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                   <a href="./about.html" class="hover:opacity-60 transition-opacity">About</a>
+                    <a href="#contact" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                
+                <button class="md:hidden p-2" onclick="toggleHeader()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="index.html" onclick="toggleHeader()">Home</a>
+                <a href="#services" onclick="toggleHeader()">Services</a>
+                <a href="./about.html" onclick="toggleHeader()">About</a>
+                <a href="#contact" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Intro Section -->
+    <section class="pt-32 pb-20 px-6 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-up">
+                    <p class="text-sm font-medium tracking-widest uppercase mb-4 text-black/50">How We Work</p>
+                    <h1 class="text-5xl md:text-6xl font-black tracking-tighter mb-8 leading-tight">
+                        Digital Work,<br>Done Right.
+                    </h1>
+                    <div class="space-y-6 text-lg text-black/70 leading-relaxed">
+                        <p>
+                            At Addro Tech, we don't just build websites or run campaigns — we architect digital ecosystems. Every project starts with deep listening. We immerse ourselves in your business, your audience, and your ambitions before a single pixel is placed.
+                        </p>
+                        <p>
+                            Our approach blends African creativity with global standards. We prototype fast, iterate with your feedback, and deliver products that scale. No shortcuts, no disappearing acts — just steady, transparent partnership from kickoff to launch and beyond.
+                        </p>
+                        <p>
+                            Whether you're a startup finding your footing or an established brand ready to level up, we meet you where you are and build what you actually need. Not what looks good in a pitch deck — what works in the real world.
+                        </p>
+                    </div>
+                </div>
+                <div class="relative fade-up">
+                    <div class="absolute inset-0 bg-black rounded-3xl transform rotate-3 translate-x-3 translate-y-3"></div>
+                    <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&h=700&fit=crop" 
+                         alt="Addro team collaborating" 
+                         class="relative rounded-3xl w-full h-[500px] object-cover border-2 border-black">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Grid -->
+    <section id="services" class="py-24 px-6 bg-neutral-50">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center mb-4 tracking-tighter fade-up">What We Do</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Pick your weapon. We'll sharpen it.</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                
+                <!-- Web Design -->
+                <div class="service-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Web Design">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Web Design</h3>
+                        <p class="text-sm text-black/60 mb-6 leading-relaxed">
+                            Beautiful, conversion-focused interfaces that tell your brand story and guide users effortlessly to action.
+                        </p>
+                        <a href="services/webdesign.html" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- SEO -->
+                <div class="service-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1572177812156-58036aae439c?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="SEO">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">SEO Integration</h3>
+                        <p class="text-sm text-black/60 mb-6 leading-relaxed">
+                            Technical SEO, content strategy, and authority building that puts your business in front of the right eyes.
+                        </p>
+                        <a href="./services/seo.html" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Graphics Design -->
+                <div class="service-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1626785774573-4b799315345d?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Graphics Design">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Graphics Design</h3>
+                        <p class="text-sm text-black/60 mb-6 leading-relaxed">
+                            Visual identities, marketing assets, and brand systems that make you unforgettable across every touchpoint.
+                        </p>
+                        <a href="./services/graphicdesign.html" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Video Editing -->
+                <div class="service-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Video Editing">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Video Editing</h3>
+                        <p class="text-sm text-black/60 mb-6 leading-relaxed">
+                            Cinematic cuts, motion graphics, and story-driven edits that stop the scroll and hold attention.
+                        </p>
+                        <a href="./services/videoediting" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Web Development -->
+                <div class="service-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="Web Development">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Web Development</h3>
+                        <p class="text-sm text-black/60 mb-6 leading-relaxed">
+                            Scalable, secure web apps and platforms built with modern stacks that grow as fast as your ambition.
+                        </p>
+                        <a href="./services/softwaredevelopment.html" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+
+                <!-- App Development -->
+                <div class="service-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=500&h=300&fit=crop" class="w-full h-full object-cover" alt="App Development">
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">App Development</h3>
+                        <p class="text-sm text-black/60 mb-6 leading-relaxed">
+                            Native and cross-platform mobile experiences that users actually want to keep on their home screen.
+                        </p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">
+                            View Details →
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Service Selector -->
+    <section class="py-24 px-6 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-30"></div>
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="text-center mb-12 fade-up">
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-4">Which Service Do I Need?</h2>
+                <p class="text-black/60 text-lg">Describe your business or idea. Our AI will match you with the perfect Addro service stack.</p>
+            </div>
+
+            <div class="bg-white border-2 border-black rounded-3xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] fade-up">
+                <!-- Chat Display -->
+                <div id="chatDisplay" class="space-y-4 mb-6 max-h-80 overflow-y-auto pr-2">
+                    <div class="flex items-start gap-3">
+                        <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold flex-shrink-0">A</div>
+                        <div class="ai-bubble p-4 text-sm leading-relaxed max-w-[85%]">
+                            Hey! I'm Addro's AI assistant. Tell me about your business, your goals, or what you're trying to build — and I'll recommend the right service(s) for you.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div id="inputArea" class="relative">
+                    <textarea 
+                        id="userInput" 
+                        rows="3" 
+                        class="w-full px-5 py-4 rounded-2xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none text-sm"
+                        placeholder="e.g. I run a small fashion boutique in Lagos and I want to start selling online..."></textarea>
+                    <button 
+                        onclick="askAI()" 
+                        id="askBtn"
+                        class="absolute bottom-3 right-3 bg-black text-white px-6 py-2 rounded-full text-sm font-bold hover:scale-105 transition-transform">
+                        Ask AI
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div id="loadingState" class="hidden py-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold flex-shrink-0">A</div>
+                        <div class="ai-bubble p-4 flex items-center gap-2">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section id="contact" class="py-32 px-6 bg-black text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10" style="background-size: 60px 60px; background-image: linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px);"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-8 tracking-tighter fade-up">Ready to Build?</h2>
+            <p class="text-xl text-white/60 mb-12 fade-up">Let's match your vision with the right service.</p>
+            <button onclick="openModal()" class="bg-white text-black px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(255,255,255,0.2)] fade-up">
+                Start a Project
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6 border-t border-white/10">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">
+                        Africa's leading tech agency. Building digital products that matter.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Branding</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="index.html#work" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="index.html#academy" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#contact" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Project Modal (Same as Home) -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                
+                <h3 class="text-2xl font-black mb-2">Start a Project</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your business and we'll get back to you within 24 hours.</p>
+                
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Name</label>
+                        <input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Scope</label>
+                        <textarea name="businessScope" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="What does your business do?"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Company Logo (Optional)</label>
+                        <input type="file" name="logo" accept="image/*" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-black/80">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Company Email</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Phone Number</label>
+                            <input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234...">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2">
+                        Submit Project Request
+                    </button>
+                </form>
+            </div>
+            
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Looking forward to building something great together.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // OpenAI Config Placeholder
+        const OPENAI_API_KEY = 'sk-your-openai-api-key-here';
+        const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+        // Header Toggle
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            
+            if (window.innerWidth < 768) {
+                mobileNav.classList.toggle('hidden');
+                return;
+            }
+            
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) {
+                header.querySelector('.header-inner').classList.add('header-collapsed');
+                logo.classList.add('expanded');
+            } else {
+                header.querySelector('.header-inner').classList.remove('header-collapsed');
+                logo.classList.remove('expanded');
+            }
+        }
+
+        // AI Chat Logic
+        async function askAI() {
+            const input = document.getElementById('userInput');
+            const chatDisplay = document.getElementById('chatDisplay');
+            const loadingState = document.getElementById('loadingState');
+            const askBtn = document.getElementById('askBtn');
+            const userText = input.value.trim();
+            
+            if (!userText) return;
+            
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'flex items-start gap-3 justify-end fade-in';
+            userMsg.innerHTML = `
+                <div class="user-bubble p-4 text-sm leading-relaxed max-w-[85%]">${escapeHtml(userText)}</div>
+                <div class="w-8 h-8 rounded-full bg-neutral-200 text-black flex items-center justify-center text-xs font-bold flex-shrink-0">You</div>
+            `;
+            chatDisplay.appendChild(userMsg);
+            input.value = '';
+            
+            // Show loading
+            loadingState.classList.remove('hidden');
+            askBtn.disabled = true;
+            askBtn.classList.add('opacity-50');
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+            
+            try {
+                // OpenAI API Call (Placeholder)
+                const response = await fetch(OPENAI_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-4',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: `You are Addro Tech's AI service consultant. Addro is an African tech agency offering: Web Design, SEO Integration, Graphics Design, Video Editing, Web Development, and App Development. 
+                                
+Your job is to analyze what the user describes and recommend 1-3 services from Addro's list that best fit their needs. Be concise, friendly, and practical. Explain WHY each service fits. If they need multiple things, suggest a logical order to tackle them. Keep responses under 150 words.`
+                            },
+                            {
+                                role: 'user',
+                                content: userText
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 300
+                    })
+                });
+                
+                let aiText;
+                
+                if (!response.ok) {
+                    // Fallback demo response when key is placeholder
+                    aiText = generateDemoResponse(userText);
+                } else {
+                    const data = await response.json();
+                    aiText = data.choices[0].message.content;
+                }
+                
+                // Add AI response
+                loadingState.classList.add('hidden');
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'flex items-start gap-3 fade-in';
+                aiMsg.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold flex-shrink-0">A</div>
+                    <div class="ai-bubble p-4 text-sm leading-relaxed max-w-[85%]">${escapeHtml(aiText).replace(/\n/g, '<br>')}</div>
+                `;
+                chatDisplay.appendChild(aiMsg);
+                
+            } catch (error) {
+                loadingState.classList.add('hidden');
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'flex items-start gap-3 fade-in';
+                aiMsg.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold flex-shrink-0">A</div>
+                    <div class="ai-bubble p-4 text-sm leading-relaxed max-w-[85%]">Based on what you've shared, I'd recommend starting with <strong>Web Design</strong> and <strong>Web Development</strong> to establish your online presence, then layering in <strong>SEO</strong> to drive traffic. Want me to refine this based on your budget or timeline?</div>
+                `;
+                chatDisplay.appendChild(aiMsg);
+            }
+            
+            askBtn.disabled = false;
+            askBtn.classList.remove('opacity-50');
+            chatDisplay.scrollTop = chatDisplay.scrollHeight;
+        }
+
+        // Demo response generator (when API key is placeholder)
+        function generateDemoResponse(text) {
+            const lower = text.toLowerCase();
+            if (lower.includes('sell') || lower.includes('shop') || lower.includes('store') || lower.includes('ecommerce') || lower.includes('product')) {
+                return "For an online store, I'd recommend:\n\n1. **Web Development** — A solid e-commerce platform is your foundation.\n2. **Web Design** — Clean product pages and smooth checkout flow convert browsers to buyers.\n3. **SEO Integration** — So customers actually find you on Google.\n\nStart with dev + design, then layer SEO once you're live.";
+            }
+            if (lower.includes('app') || lower.includes('mobile') || lower.includes('iphone') || lower.includes('android')) {
+                return "Sounds like you need **App Development** as your core deliverable. If you also need a landing page or marketing site to support the app launch, I'd add **Web Design** + **Web Development**. Want to start with an MVP app first?";
+            }
+            if (lower.includes('brand') || lower.includes('logo') || lower.includes('identity') || lower.includes('visual')) {
+                return "You're describing a branding project! Here's my recommendation:\n\n1. **Graphics Design** — Logo, color palette, and brand assets.\n2. **Web Design** — A brand-forward site that shows off your new identity.\n3. **Video Editing** — Brand story or promo content to announce the rebrand.\n\nLet's lock the visuals first, then build around them.";
+            }
+            if (lower.includes('video') || lower.includes('content') || lower.includes('youtube') || lower.includes('edit')) {
+                return "Content-heavy workflow? I'd go with:\n\n1. **Video Editing** — Polished cuts that keep viewers watching.\n2. **Graphics Design** — Thumbnails, overlays, and branded templates.\n3. **Web Design** — A portfolio or channel hub to house everything.\n\nThis stack keeps your content machine running smooth.";
+            }
+            if (lower.includes('seo') || lower.includes('google') || lower.includes('rank') || lower.includes('traffic')) {
+                return "Growth-focused? **SEO Integration** is your starting point. But SEO needs something to optimize — so pair it with **Web Development** (for technical speed/structure) and **Web Design** (for low bounce rates). That's the trifecta for organic growth.";
+            }
+            return "Great question! Based on what you've shared, I'd suggest starting with **Web Design** + **Web Development** to build your digital home base. From there, we can add **SEO** for discovery or **Graphics Design** for brand consistency. What matters most to you right now — launching fast or launching polished?";
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Allow Enter to submit (Shift+Enter for new line)
+        document.getElementById('userInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                askAI();
+            }
+        });
+
+        // Modal Logic (Same as Home)
+        function openModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            const success = document.getElementById('successCard');
+            
+            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            success.classList.add('scale-95', 'opacity-0', 'hidden');
+            success.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('projectForm').reset();
+            }, 300);
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            console.log('Form Data:', Object.fromEntries(formData));
+            
+            document.getElementById('modalContent').classList.add('hidden');
+            const success = document.getElementById('successCard');
+            success.classList.remove('hidden');
+            setTimeout(() => {
+                success.classList.remove('scale-95', 'opacity-0');
+                success.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        // GSAP Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => {
+            gsap.fromTo(elem, 
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: 'top 85%',
+                        toggleActions: 'play none none none'
+                    },
+                    delay: i * 0.05
+                }
+            );
+        });
+
+        // Header scroll shadow
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('mainHeader');
+            if (window.pageYOffset > 100) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body>
+</html>

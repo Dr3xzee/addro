@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Loading… | Addro Blog</title>
+    <meta name="description" id="pageDescription" content="Insights on web development, SEO, branding, and building Africa's digital future — from Addro.">
+    <link rel="canonical" id="canonicalLink" href="https://addro.com.ng/blog/post.html">
+
+    <link rel="icon" type="image/jpeg" href="/logo.jpg">
+    <link rel="shortcut icon" href="/logo.jpg">
+
+    <meta property="og:type" content="article">
+    <meta property="og:title" id="ogTitle" content="Addro Blog">
+    <meta property="og:description" id="ogDescription" content="Insights from Addro.">
+    <meta property="og:image" id="ogImage" content="https://addro.com.ng/logo.jpg">
+    <meta property="og:url" id="ogUrl" content="">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script type="application/ld+json" id="articleSchema">{}</script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        html { scroll-behavior: smooth; }
+
+        /* ---------- PROSE STYLES (matches editor output) ---------- */
+        .prose-addro { font-size: 1.1rem; line-height: 1.8; color: #1a1a1a; }
+        .prose-addro > *:first-child { margin-top: 0 !important; }
+
+        /* Headings */
+        .prose-addro h1 { font-weight: 900; font-size: 2.2rem; letter-spacing: -0.8px; margin: 40px 0 14px; line-height: 1.2; }
+        .prose-addro h2 { font-weight: 900; font-size: 1.7rem; letter-spacing: -0.5px; margin: 36px 0 12px; line-height: 1.25; }
+        .prose-addro h3 { font-weight: 800; font-size: 1.4rem; margin: 30px 0 10px; letter-spacing: -0.3px; }
+        .prose-addro h4 { font-weight: 800; font-size: 1.2rem; margin: 26px 0 8px; }
+        .prose-addro h5 { font-weight: 700; font-size: 1.05rem; margin: 22px 0 6px; }
+        .prose-addro h6 { font-weight: 700; font-size: 0.9rem; margin: 20px 0 6px; text-transform: uppercase; letter-spacing: 1.2px; color: #888; }
+
+        /* Paragraphs */
+        .prose-addro p { margin-bottom: 20px; }
+
+        /* Inline formatting */
+        .prose-addro b, .prose-addro strong { font-weight: 700; }
+        .prose-addro i, .prose-addro em { font-style: italic; }
+        .prose-addro u { text-decoration: underline; text-underline-offset: 2px; }
+        .prose-addro s, .prose-addro strike, .prose-addro del { text-decoration: line-through; color: #666; }
+        .prose-addro mark { background: #fff176; padding: 0 3px; border-radius: 3px; }
+
+        /* Links */
+        .prose-addro a { color: #5e17eb; text-decoration: none; border-bottom: 1px solid rgba(94,23,235,0.3); transition: border-color 0.2s; }
+        .prose-addro a:hover { border-bottom-color: #5e17eb; }
+
+        /* Images */
+        .prose-addro img { max-width: 100%; border-radius: 16px; margin: 28px 0; display: block; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+
+        /* Blockquotes */
+        .prose-addro blockquote {
+            border-left: 3px solid #5e17eb; padding: 16px 0 16px 24px; margin: 28px 0;
+            color: #444; position: relative; font-size: 1.15rem; line-height: 1.7;
+        }
+        .prose-addro blockquote::before {
+            content: "\201C"; position: absolute; left: -6px; top: -8px; font-size: 3rem;
+            color: #5e17eb; opacity: 0.15; font-family: Georgia, serif; line-height: 1;
+        }
+        .prose-addro blockquote p { margin-bottom: 12px; font-style: italic; }
+        .prose-addro blockquote p:last-child { margin-bottom: 0; }
+
+        /* Lists */
+        .prose-addro ul, .prose-addro ol { margin: 0 0 20px 28px; }
+        .prose-addro li { margin-bottom: 6px; }
+        .prose-addro ul { list-style-type: disc; }
+        .prose-addro ol { list-style-type: decimal; }
+
+        /* Section break */
+        .prose-addro hr, .prose-addro hr.section-break {
+            border: none; text-align: center; margin: 48px 0; height: 1px;
+            background: #eaeaea; position: relative;
+        }
+        .prose-addro hr::before, .prose-addro hr.section-break::before {
+            content: "• • •"; position: absolute; left: 50%; top: 50%;
+            transform: translate(-50%, -50%); background: #fff; padding: 0 16px;
+            color: #888; font-size: 0.9rem; letter-spacing: 4px;
+        }
+
+        /* Code */
+        .prose-addro pre {
+            background: #1e1e2e; color: #e4e4e7; padding: 22px; border-radius: 14px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Monaco, Consolas, monospace;
+            font-size: 0.92rem; line-height: 1.65; overflow-x: auto; margin: 28px 0;
+            position: relative;
+        }
+        .prose-addro pre code {
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Monaco, Consolas, monospace;
+            background: transparent; padding: 0; color: inherit; font-size: inherit;
+        }
+        .prose-addro code {
+            background: #f1f1f4; padding: 2px 6px; border-radius: 5px;
+            font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', Monaco, Consolas, monospace;
+            font-size: 0.88em; color: #d73a49;
+        }
+
+        /* Tables */
+        .prose-addro table {
+            width: 100%; border-collapse: separate; border-spacing: 0; margin: 28px 0;
+            font-size: 0.95rem; border-radius: 12px; overflow: hidden; border: 1px solid #eaeaea;
+        }
+        .prose-addro th, .prose-addro td {
+            border-bottom: 1px solid #eaeaea; padding: 12px 16px; text-align: left;
+        }
+        .prose-addro th {
+            background: #f5f5f5; font-weight: 700; font-size: 0.8rem;
+            text-transform: uppercase; letter-spacing: 0.5px; color: #888;
+        }
+        .prose-addro tr:last-child td { border-bottom: none; }
+        .prose-addro tr:hover td { background: #fafafa; }
+
+        /* Video embeds */
+        .prose-addro .embed-wrapper {
+            position: relative; padding-bottom: 56.25%; height: 0; margin: 28px 0;
+            border-radius: 16px; overflow: hidden; background: #0a0a0a;
+        }
+        .prose-addro .embed-wrapper iframe {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;
+        }
+
+        /* Text alignment (from editor justify commands) */
+        .prose-addro [style*="text-align: center"],
+        .prose-addro [align="center"] { text-align: center; }
+        .prose-addro [style*="text-align: right"],
+        .prose-addro [align="right"] { text-align: right; }
+        .prose-addro [style*="text-align: left"],
+        .prose-addro [align="left"] { text-align: left; }
+        .prose-addro [style*="text-align: justify"],
+        .prose-addro [align="justify"] { text-align: justify; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .prose-addro { font-size: 1rem; line-height: 1.75; }
+            .prose-addro h1 { font-size: 1.6rem; margin: 28px 0 10px; }
+            .prose-addro h2 { font-size: 1.35rem; margin: 24px 0 8px; }
+            .prose-addro h3 { font-size: 1.15rem; margin: 20px 0 8px; }
+            .prose-addro h4 { font-size: 1.05rem; margin: 18px 0 6px; }
+            .prose-addro blockquote { padding: 12px 0 12px 18px; margin: 20px 0; font-size: 1.05rem; }
+            .prose-addro pre { padding: 16px; font-size: 0.85rem; }
+            .prose-addro img { border-radius: 12px; margin: 20px 0; }
+            .prose-addro table { font-size: 0.85rem; }
+            .prose-addro th, .prose-addro td { padding: 10px 12px; }
+        }
+
+        /* Skeleton */
+        .skeleton { background: linear-gradient(90deg,#eee 25%,#f5f5f5 37%,#eee 63%); background-size:400% 100%; animation:shimmer 1.4s ease infinite; }
+        @keyframes shimmer { 0% { background-position:100% 50%; } 100% { background-position:0 50%; } }
+    </style>
+<base target="_blank">
+</head>
+<body class="bg-white text-black">
+
+    <header class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-black/5">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="/index.html" class="text-2xl font-black tracking-tighter">ADDRO</a>
+            <a href="/blog.html" class="text-sm font-bold hover:opacity-60">← All Articles</a>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-6 pt-32 pb-24" id="postRoot">
+        <div id="skeleton">
+            <div class="h-6 w-24 rounded-full skeleton mb-6"></div>
+            <div class="h-12 w-full rounded-lg skeleton mb-3"></div>
+            <div class="h-12 w-3/4 rounded-lg skeleton mb-8"></div>
+            <div class="h-80 w-full rounded-2xl skeleton mb-10"></div>
+            <div class="h-4 w-full rounded skeleton mb-3"></div>
+            <div class="h-4 w-full rounded skeleton mb-3"></div>
+            <div class="h-4 w-2/3 rounded skeleton mb-3"></div>
+        </div>
+
+        <article id="postContent" class="hidden">
+            <div class="flex flex-wrap items-center gap-4 mb-6 text-sm text-black/50">
+                <span id="postCategory" class="bg-neutral-100 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-black/70"></span>
+                <span id="postDate"></span>
+                <span>•</span>
+                <span id="postReadTime"></span>
+            </div>
+            <h1 id="postTitle" class="text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight"></h1>
+            <p id="postExcerpt" class="text-xl text-black/60 leading-relaxed mb-8"></p>
+            <div class="flex items-center gap-3 mb-10 pb-10 border-b border-black/10">
+                <div class="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center font-bold" id="postAvatar"></div>
+                <div>
+                    <p class="font-bold text-sm" id="postAuthor"></p>
+                    <p class="text-black/40 text-xs">Addro</p>
+                </div>
+            </div>
+            <img id="postCover" class="w-full rounded-2xl mb-10 hidden" alt="">
+            <div id="postBody" class="prose-addro"></div>
+
+            <div class="mt-16 pt-10 border-t border-black/10 text-center">
+                <p class="text-black/50 mb-4">Need something built like this?</p>
+                <a href="/works/websitework.html" class="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform">
+                    Need a digital boost? →
+                </a>
+            </div>
+        </article>
+
+        <div id="notFound" class="hidden text-center py-24">
+            <p class="text-3xl font-black tracking-tight mb-3">Article not found</p>
+            <p class="text-black/50 mb-8">This post may have been moved or unpublished.</p>
+            <a href="/blog.html" class="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform">← Back to Blog</a>
+        </div>
+    </main>
+
+    <footer class="bg-black text-white py-12 px-6 text-center">
+        <p class="text-white/40 text-sm">© 2026 Addro. All rights reserved.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, query, where, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+            authDomain: "addro-7b1b4.firebaseapp.com",
+            projectId: "addro-7b1b4",
+            storageBucket: "addro-7b1b4.firebasestorage.app",
+            messagingSenderId: "578631006560",
+            appId: "1:578631006560:web:484e4c9643b4494be5c605",
+            measurementId: "G-YZJW7T79KD"
+        };
+
+        const SITE_URL = "https://addrotech.com.ng";
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const params = new URLSearchParams(window.location.search);
+        const slug = params.get('slug');
+
+        async function loadPost() {
+            if (!slug) return showNotFound();
+
+            const q = query(
+                collection(db, "posts"),
+                where("slug", "==", slug),
+                where("status", "==", "published"),
+                limit(1)
+            );
+            const snap = await getDocs(q);
+            if (snap.empty) return showNotFound();
+
+            const post = snap.docs[0].data();
+            renderPost(post);
+            setSeoTags(post);
+        }
+
+        function renderPost(p) {
+            document.getElementById('postCategory').textContent = p.category || "";
+            document.getElementById('postDate').textContent = formatDate(p.publishedAt);
+            document.getElementById('postReadTime').textContent = readingTime(p.content);
+            document.getElementById('postTitle').textContent = p.title || "";
+            document.getElementById('postExcerpt').textContent = p.excerpt || "";
+            document.getElementById('postAuthor').textContent = p.author || "Addro Team";
+            document.getElementById('postAvatar').textContent = (p.author || "A").charAt(0).toUpperCase();
+
+            if (p.coverImage) {
+                const cover = document.getElementById('postCover');
+                cover.src = p.coverImage;
+                cover.alt = p.title || "";
+                cover.classList.remove('hidden');
+            }
+
+            document.getElementById('postBody').innerHTML = p.content || "";
+
+            document.getElementById('skeleton').classList.add('hidden');
+            document.getElementById('postContent').classList.remove('hidden');
+        }
+
+        function setSeoTags(p) {
+            const title = `${p.title} | Addro Blog`;
+            const description = p.excerpt || stripHtml(p.content).slice(0, 155);
+            const url = `${SITE_URL}/blog/post.html?slug=${encodeURIComponent(p.slug)}`;
+            const image = p.coverImage || `${SITE_URL}/logo.jpg`;
+
+            document.title = title;
+            document.getElementById('pageTitle').textContent = title;
+            document.getElementById('pageDescription').setAttribute('content', description);
+            document.getElementById('canonicalLink').setAttribute('href', url);
+            document.getElementById('ogTitle').setAttribute('content', title);
+            document.getElementById('ogDescription').setAttribute('content', description);
+            document.getElementById('ogImage').setAttribute('content', image);
+            document.getElementById('ogUrl').setAttribute('content', url);
+
+            const schema = {
+                "@context": "https://schema.org",
+                "@type": "Article",
+                "headline": p.title,
+                "description": description,
+                "image": image,
+                "author": { "@type": "Person", "name": p.author || "Addro Team" },
+                "publisher": {
+                    "@type": "Organization",
+                    "name": "Addro",
+                    "logo": { "@type": "ImageObject", "url": `${SITE_URL}/logo.jpg` }
+                },
+                "datePublished": p.publishedAt ? tsToISO(p.publishedAt) : undefined,
+                "dateModified": p.updatedAt ? tsToISO(p.updatedAt) : undefined,
+                "mainEntityOfPage": { "@type": "WebPage", "@id": url }
+            };
+            document.getElementById('articleSchema').textContent = JSON.stringify(schema);
+        }
+
+        function showNotFound() {
+            document.getElementById('skeleton').classList.add('hidden');
+            document.getElementById('notFound').classList.remove('hidden');
+        }
+
+        function formatDate(ts) {
+            if (!ts) return "";
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+        }
+        function tsToISO(ts) {
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toISOString();
+        }
+        function readingTime(html) {
+            if (!html) return "1 min read";
+            const words = html.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+            return `${Math.max(1, Math.round(words / 200))} min read`;
+        }
+        function stripHtml(html) {
+            return (html || "").replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        loadPost().catch(err => {
+            console.error("Failed to load post:", err);
+            showNotFound();
+        });
+    </script>
+
+</body>
+</html>

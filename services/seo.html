@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEO — Get Found. Get Leads. Get Growing. | Addro Tech</title>
+    <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+        
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { 
+            transform: translateY(-100%); 
+            opacity: 0;
+            pointer-events: none;
+        }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            background: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        
+        /* Mock Google Results */
+        .serp-result {
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .serp-result:hover {
+            border-left-color: #000;
+            padding-left: 12px;
+            background: rgba(0,0,0,0.02);
+        }
+        .serp-url { color: #202124; }
+        .serp-title { color: #1a0dab; }
+        .serp-desc { color: #4d5156; }
+        
+        /* Counter animation */
+        .counter {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        /* Process cards */
+        .process-card {
+            border: 2px solid #000;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        .process-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 6px 6px 0px #000;
+        }
+        
+        /* FAQ */
+        .faq-item {
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+            padding-bottom: 20px;
+        }
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+        .faq-item.open .faq-icon {
+            transform: rotate(45deg);
+        }
+        
+        /* Traffic chart bars */
+        .traffic-bar {
+            transform-origin: bottom;
+            transform: scaleY(0);
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .traffic-bar.animate {
+            transform: scaleY(1);
+        }
+        
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../index.html" class="hover:opacity-60 transition-opacity">Home</a>
+                    <a href="../services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                </nav>
+                
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()">
+                    <h1 class="text-2xl font-black tracking-tighter">ADDRO</h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../academy.html" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="../contact.html" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                
+                <button class="md:hidden p-2" onclick="toggleHeader()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="../index.html" onclick="toggleHeader()">Home</a>
+                <a href="../services.html" onclick="toggleHeader()">Services</a>
+                <a href="../academy.html" onclick="toggleHeader()">Academy</a>
+                <a href="../contact.html" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-20 px-6 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-40"></div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-up">
+                    <p class="text-sm font-medium tracking-widest uppercase mb-6 text-black/50">SEO Integration</p>
+                    <h1 class="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.95]">
+                        Get Found.<br>
+                        Get Leads.<br>
+                        Get Growing.
+                    </h1>
+                    <p class="text-xl text-black/60 mb-10 leading-relaxed">
+                        You built the site. Now let's make sure Google actually sends people to it. Technical SEO, content strategy, and authority building — done the Addro way.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="openModal()" class="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)]">
+                            Boost My Rankings
+                        </button>
+                        <a href="#process" class="border-2 border-black px-8 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all text-center">
+                            See the Game Plan
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mock Google SERP -->
+                <div class="fade-up">
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-black/10">
+                            <div class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold">G</div>
+                            <div class="flex-1 bg-neutral-100 rounded-full px-4 py-2 text-sm text-black/40">best fintech app africa</div>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="serp-result p-3 rounded-lg cursor-pointer">
+                                <p class="text-xs serp-url mb-1">www.addroclient.com › fintech</p>
+                                <h4 class="text-base font-medium serp-title mb-1 hover:underline">The Best Fintech App in Africa | Secure, Fast, Reliable</h4>
+                                <p class="text-sm serp-desc">Join 50,000+ users managing money smarter. Zero hidden fees, instant transfers, and bank-grade security...</p>
+                                <div class="flex gap-2 mt-2">
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded">#1 Ranking</span>
+                                    <span class="text-xs text-black/40">addroclient.com</span>
+                                </div>
+                            </div>
+                            
+                            <div class="serp-result p-3 rounded-lg cursor-pointer opacity-50">
+                                <p class="text-xs serp-url mb-1">www.somecompetitor.com</p>
+                                <h4 class="text-base font-medium serp-title mb-1">Fintech Solutions for Africa</h4>
+                                <p class="text-sm serp-desc">We provide financial technology services across the continent...</p>
+                            </div>
+                            
+                            <div class="serp-result p-3 rounded-lg cursor-pointer opacity-50">
+                                <p class="text-xs serp-url mb-1">www.anotherguy.com › products</p>
+                                <h4 class="text-base font-medium serp-title mb-1">Digital Finance Tools | 2026</h4>
+                                <p class="text-sm serp-desc">Explore our range of digital finance products...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-black/10 flex justify-center gap-2">
+                            <span class="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center text-xs font-bold">1</span>
+                            <span class="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-xs text-black/40">2</span>
+                            <span class="w-8 h-8 rounded-full bg-neutral-100 flex items-center justify-center text-xs text-black/40">3</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem -->
+    <section class="py-20 px-6 bg-neutral-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-black text-center tracking-tighter mb-4 fade-up">The Invisibility Tax</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Being on page 2 of Google is like being invisible. Here's what that costs you.</p>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl font-black mb-4">91%</div>
+                    <h3 class="font-bold text-lg mb-2">Never Click Past Page 1</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">If you're not ranking on the first page, you might as well not exist. Most users never bother scrolling further.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl font-black mb-4">0%</div>
+                    <h3 class="font-bold text-lg mb-2">Traffic From Broken SEO</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Slow load times, missing meta tags, no schema markup — Google ignores broken sites. And so do customers.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl font-black mb-4">$$$</div>
+                    <h3 class="font-bold text-lg mb-2">Burning Cash on Ads</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Without organic SEO, you're renting traffic forever. The moment you stop paying for ads, the leads vanish.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-start">
+                <div class="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-6">What's in the Box</h2>
+                    <p class="text-black/60 text-lg mb-10">No vague promises. No black-box magic. Just a clear checklist of what we actually do.</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">01</div>
+                            <div>
+                                <h4 class="font-bold mb-1">Technical SEO Audit & Fix</h4>
+                                <p class="text-sm text-black/60">Site speed, mobile responsiveness, crawl errors, XML sitemaps, schema markup, Core Web Vitals — we fix the foundation.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">02</div>
+                            <div>
+                                <h4 class="font-bold mb-1">Keyword Research & Strategy</h4>
+                                <p class="text-sm text-black/60">We find what your customers are actually searching for — not what you think they're searching for. High intent, low competition.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">03</div>
+                            <div>
+                                <h4 class="font-bold mb-1">On-Page Optimization</h4>
+                                <p class="text-sm text-black/60">Title tags, meta descriptions, header hierarchy, image alt text, internal linking, URL structure — every page tuned to rank.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">04</div>
+                            <div>
+                                <h4 class="font-bold mb-1">Content Strategy & Briefs</h4>
+                                <p class="text-sm text-black/60">Editorial calendar, blog topic clusters, landing page copy briefs. We tell you exactly what to write and why.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">05</div>
+                            <div>
+                                <h4 class="font-bold mb-1">Backlink Building Plan</h4>
+                                <p class="text-sm text-black/60">Quality over quantity. We identify authority sites in your niche and build a realistic outreach strategy.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4">
+                            <div class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center flex-shrink-0 font-bold text-sm">06</div>
+                            <div>
+                                <h4 class="font-bold mb-1">Monthly Reporting Dashboard</h4>
+                                <p class="text-sm text-black/60">Rankings, traffic, conversions — tracked and reported in plain English. No jargon, no hiding.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Visual: Before/After Traffic -->
+                <div class="fade-up">
+                    <div class="bg-neutral-50 border-2 border-black rounded-3xl p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        <h3 class="font-bold text-lg mb-6 text-center">Organic Traffic Growth</h3>
+                        <div class="flex items-end justify-between gap-3 h-64 mb-4 px-2">
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40">Jan</span>
+                                <div class="traffic-bar w-full bg-black/10 rounded-t-lg" style="height: 15%;" data-height="15"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40">Feb</span>
+                                <div class="traffic-bar w-full bg-black/10 rounded-t-lg" style="height: 18%;" data-height="18"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40">Mar</span>
+                                <div class="traffic-bar w-full bg-black/10 rounded-t-lg" style="height: 22%;" data-height="22"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40">Apr</span>
+                                <div class="traffic-bar w-full bg-black/20 rounded-t-lg" style="height: 35%;" data-height="35"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40">May</span>
+                                <div class="traffic-bar w-full bg-black/30 rounded-t-lg" style="height: 48%;" data-height="48"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40">Jun</span>
+                                <div class="traffic-bar w-full bg-black/50 rounded-t-lg" style="height: 62%;" data-height="62"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40">Jul</span>
+                                <div class="traffic-bar w-full bg-black/70 rounded-t-lg" style="height: 78%;" data-height="78"></div>
+                            </div>
+                            <div class="flex flex-col items-center gap-2 flex-1">
+                                <span class="text-xs text-black/40 font-bold">Aug</span>
+                                <div class="traffic-bar w-full bg-black rounded-t-lg" style="height: 95%;" data-height="95"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t border-black/10">
+                            <div>
+                                <p class="text-xs text-black/40 uppercase tracking-wider">Before Addro</p>
+                                <p class="font-bold">120 visits/mo</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-xs text-black/40 uppercase tracking-wider">After 6 Months</p>
+                                <p class="font-bold text-2xl">8,400 visits/mo</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-black text-white text-center py-2 rounded-lg text-sm font-bold">
+                            ↑ 6,900% Increase
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process -->
+    <section id="process" class="py-24 px-6 bg-neutral-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">The Addro SEO Playbook</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">No guesswork. No shortcuts. Just a proven system.</p>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="process-card rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">1</div>
+                    <h3 class="font-bold text-lg mb-2">Audit & Diagnose</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">We crawl your entire site and identify every technical issue holding you back. Speed, structure, indexability — mapped out.</p>
+                </div>
+                
+                <div class="process-card rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">2</div>
+                    <h3 class="font-bold text-lg mb-2">Keyword Intel</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Competitor analysis + search intent research. We build a keyword map that targets buyers, not just browsers.</p>
+                </div>
+                
+                <div class="process-card rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">3</div>
+                    <h3 class="font-bold text-lg mb-2">Optimize & Build</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">On-page fixes, content briefs, technical improvements. We implement the heavy lifting so you don't have to.</p>
+                </div>
+                
+                <div class="process-card rounded-2xl p-6 fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">4</div>
+                    <h3 class="font-bold text-lg mb-2">Scale & Report</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Monthly content execution, backlink outreach, and transparent reporting. We iterate based on what the data says.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">Rankings That Talk</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Real clients. Real keywords. Real page-one results.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="bg-neutral-100 p-6 border-b-2 border-black">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-black text-white text-xs font-bold px-3 py-1 rounded-full">E-COMMERCE</span>
+                            <span class="text-sm font-bold text-green-700">+340% Organic Traffic</span>
+                        </div>
+                        <h3 class="text-2xl font-black tracking-tighter">Lagos Fashion Store</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between items-center py-2 border-b border-black/5">
+                                <span class="text-sm text-black/60">"buy ankara dresses online"</span>
+                                <span class="text-sm font-bold">#2 → #1</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-black/5">
+                                <span class="text-sm text-black/60">"african fashion lagos"</span>
+                                <span class="text-sm font-bold">#8 → #3</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-black/5">
+                                <span class="text-sm text-black/60">"traditional wear nigeria"</span>
+                                <span class="text-sm font-bold">Not ranked → #4</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-black/60 mb-4">Technical audit fixed 47 crawl errors. Content strategy targeted 15 buyer-intent keywords. Backlink campaign secured 12 authority mentions.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">Read Full Case Study →</a>
+                    </div>
+                </div>
+                
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="bg-neutral-100 p-6 border-b-2 border-black">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bg-black text-white text-xs font-bold px-3 py-1 rounded-full">B2B SAAS</span>
+                            <span class="text-sm font-bold text-green-700">+210% Demo Requests</span>
+                        </div>
+                        <h3 class="text-2xl font-black tracking-tighter">Payroll Software Startup</h3>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-3 mb-6">
+                            <div class="flex justify-between items-center py-2 border-b border-black/5">
+                                <span class="text-sm text-black/60">"hr payroll software africa"</span>
+                                <span class="text-sm font-bold">#5 → #1</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-black/5">
+                                <span class="text-sm text-black/60">"automate employee payments"</span>
+                                <span class="text-sm font-bold">#12 → #2</span>
+                            </div>
+                            <div class="flex justify-between items-center py-2 border-b border-black/5">
+                                <span class="text-sm text-black/60">"best payroll tool nigeria"</span>
+                                <span class="text-sm font-bold">Not ranked → #3</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-black/60 mb-4">Restructured site architecture for topical authority. Built 8 pillar pages with internal linking. Schema markup for SaaS features.</p>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">Read Full Case Study →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-20 px-6 bg-black text-white">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Pick Your Growth Speed</h2>
+            
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Starter</h3>
+                    <p class="text-4xl font-black mb-4">$800<span class="text-lg font-normal text-white/50">/mo</span></p>
+                    <p class="text-sm text-white/60 mb-6">For small businesses ready to stop being invisible.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Technical audit + fixes</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>5 keywords tracked</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>2 blog briefs/month</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Monthly report</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Get Started</button>
+                </div>
+                
+                <div class="bg-white text-black rounded-2xl p-8 relative fade-up">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
+                    <h3 class="text-sm uppercase tracking-widest text-black/50 mb-2">Growth</h3>
+                    <p class="text-4xl font-black mb-4">$1,500<span class="text-lg font-normal text-black/50">/mo</span></p>
+                    <p class="text-sm text-black/60 mb-6">For businesses serious about dominating search.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Everything in Starter</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>15 keywords tracked</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>4 blog briefs + 1 written</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Backlink outreach (5/mo)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Bi-weekly calls</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full bg-black text-white py-3 rounded-full font-bold hover:scale-105 transition-transform">Get Started</button>
+                </div>
+                
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Dominate</h3>
+                    <p class="text-4xl font-black mb-4">$3,000<span class="text-lg font-normal text-white/50">/mo</span></p>
+                    <p class="text-sm text-white/60 mb-6">For market leaders who want to own their niche.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Everything in Growth</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>30+ keywords tracked</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>8 blog briefs + 4 written</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Advanced schema + local SEO</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Weekly strategy calls</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Get Started</button>
+                </div>
+            </div>
+            
+            <p class="text-center text-white/40 text-sm mt-8 fade-up">All plans require a 3-month minimum commitment. SEO is a marathon, not a sprint.</p>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Still Curious?</h2>
+            
+            <div class="space-y-0">
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">How long before I see results?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">Typically 2–3 months for technical fixes to kick in, and 4–6 months for significant ranking jumps. SEO compounds over time — the businesses that commit for 6+ months see the biggest returns. We set realistic expectations upfront and track progress monthly so you see the trend.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Do you guarantee #1 rankings?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">No one can ethically guarantee #1 — and if they do, run. What we guarantee is transparent work, measurable progress, and a strategy built on data not hope. We track keyword movement, traffic growth, and conversions. If we're not moving the needle, we pivot the strategy.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Do I need to create the content myself?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">We give you detailed content briefs (topic, keywords, structure, word count) so you or your writer can execute. On higher-tier plans, we also write the content for you. Either way, we optimize everything before it goes live.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What if my website is brand new?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">New sites take longer to rank — that's just reality. But starting SEO early means you build authority from day one instead of fixing messes later. We focus on long-tail, low-competition keywords first to get you early wins while we build toward the big terms.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Can I cancel anytime?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">After the initial 3-month commitment, yes — month-to-month. But honestly, clients who stick around 6–12 months are the ones who write us testimonials. SEO is an investment, not a quick flip.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter fade-up">Stop Being Invisible.</h2>
+            <p class="text-xl text-black/60 mb-12 fade-up">Your competitors are ranking. Your customers are searching. Let's close the gap.</p>
+            <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] fade-up">
+                Start My SEO Campaign
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">
+                        Africa's leading tech agency. Building digital products that matter.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="webdesign.html" class="hover:text-white transition-colors">Web Design</a></li>
+                        <li><a href="softwaredevelopment.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="appdev.html" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="seo.html" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="../services.html" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="../academy.html" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="../blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="../contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                
+                <h3 class="text-2xl font-black mb-2">Start Your SEO Campaign</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your site and we'll audit it for free.</p>
+                
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Name</label>
+                        <input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Website URL</label>
+                        <input type="url" name="websiteUrl" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="https://your-site.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">What are your main goals?</label>
+                        <select name="seoGoal" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white">
+                            <option>More organic traffic</option>
+                            <option>Rank for specific keywords</option>
+                            <option>Local SEO (appear in Maps)</option>
+                            <option>Fix technical issues</option>
+                            <option>Content strategy</option>
+                            <option>All of the above</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Current monthly organic traffic (approx)</label>
+                        <select name="currentTraffic" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white">
+                            <option>Not sure / Don't track</option>
+                            <option>Under 500 visits</option>
+                            <option>500 – 2,000 visits</option>
+                            <option>2,000 – 10,000 visits</option>
+                            <option>10,000+ visits</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Company Email</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Phone Number</label>
+                            <input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234...">
+                        </div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2 flex items-center justify-center gap-2">
+    <span id="btnText">Submit Request</span>
+    <div id="btnSpinner" class="spinner hidden" style="width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;"></div>
+</button>
+                </form>
+            </div>
+            
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <h3 class="text-2xl font-black mb-2">You're In!</h3>
+                <p class="text-black/60">We'll audit your site and send a personalized SEO roadmap within 48 hours.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Firebase Config — SWAP THESE WITH YOUR REAL VALUES
+const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+
+let db;
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log("Firebase connected");
+} catch (e) {
+    console.log("Firebase not configured yet — form will log to console");
+}
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            
+            if (window.innerWidth < 768) {
+                mobileNav.classList.toggle('hidden');
+                return;
+            }
+            
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) {
+                header.querySelector('.header-inner').classList.add('header-collapsed');
+                logo.classList.add('expanded');
+            } else {
+                header.querySelector('.header-inner').classList.remove('header-collapsed');
+                logo.classList.remove('expanded');
+            }
+        }
+
+        function toggleFaq(item) {
+            const allItems = document.querySelectorAll('.faq-item');
+            allItems.forEach(el => {
+                if (el !== item) el.classList.remove('open');
+            });
+            item.classList.toggle('open');
+        }
+
+        function openModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            const success = document.getElementById('successCard');
+            
+            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            success.classList.add('scale-95', 'opacity-0', 'hidden');
+            success.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('projectForm').reset();
+            }, 300);
+        }
+
+        async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form));
+    data.timestamp = new Date().toISOString();
+    data.status = "new";
+
+    // Optional: button loading state
+    const btn = document.getElementById('submitBtn');
+const btnText = document.getElementById('btnText');
+const spinner = document.getElementById('btnSpinner');
+btn.disabled = true;
+btnText.textContent = 'Sending...';
+spinner.classList.remove('hidden');
+
+    try {
+        if (db) {
+            // CHANGE THIS COLLECTION NAME PER PAGE (see list below)
+            await db.collection('webDesignProjects').add(data);
+            console.log('Saved to Firebase:', data);
+        } else {
+            console.log('Firebase not ready, logged:', data);
+            await new Promise(r => setTimeout(r, 800)); // fake delay for demo
+        }
+
+        // Show success card
+        document.getElementById('modalContent').classList.add('hidden');
+        const success = document.getElementById('successCard');
+        success.classList.remove('hidden');
+        setTimeout(() => {
+            success.classList.remove('scale-95', 'opacity-0');
+            success.classList.add('scale-100', 'opacity-100');
+        }, 10);
+
+    } catch (error) {
+        console.error('Error saving:', error);
+        alert('Something went wrong. Please try again or email us directly.');
+        btn.disabled = false;
+btnText.textContent = 'Submit Request'; // or whatever your original text was
+spinner.classList.add('hidden');
+    }
+}
+
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => {
+            gsap.fromTo(elem, 
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: 'top 85%',
+                        toggleActions: 'play none none none'
+                    },
+                    delay: i * 0.05
+                }
+            );
+        });
+
+        // Animate traffic bars when scrolled into view
+        ScrollTrigger.create({ 
+            trigger: '.traffic-bar',
+            start: 'top 80%',
+            onEnter: () => {
+                document.querySelectorAll('.traffic-bar').forEach(bar => {
+                    bar.classList.add('animate');
+                });
+            }
+        });
+
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('mainHeader');
+            if (window.pageYOffset > 100) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body>
+</html>

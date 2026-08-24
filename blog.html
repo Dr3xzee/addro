@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog | Addro Tech Agency — Insights on Web Dev, SEO & African Tech</title>
+    <meta name="description" content="The Addro blog covers web development, SEO strategies, branding tips, motion design trends, and insights on building Africa's digital future.">
+    <link rel="canonical" href="https://addro.com.ng/blog.html">
+
+    <link rel="icon" type="image/jpeg" href="/logo.jpg">
+    <link rel="shortcut icon" href="/logo.jpg">
+    <link rel="apple-touch-icon" sizes="180x180" href="/logo.jpg">
+
+    <meta property="og:title" content="Addro Blog | Insights on African Tech">
+    <meta property="og:description" content="Web development, SEO, branding, and tech insights from Africa's leading digital agency.">
+    <meta property="og:image" content="https://addro.com.ng/logo.jpg">
+    <meta property="og:type" content="website">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image:
+                linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
+
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+
+        .blog-card { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .blog-card:hover { transform: translateY(-8px); box-shadow: 8px 12px 0px #000; }
+        .blog-card:hover .card-img { transform: scale(1.05); }
+        .card-img { transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .cat-pill { transition: all 0.2s ease; cursor: pointer; }
+        .cat-pill:hover { background: #000; color: #fff; transform: translateY(-2px); }
+        .cat-pill.active { background: #000; color: #fff; }
+
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { padding-left: 8px; color: #000; }
+
+        .search-input:focus { outline: none; border-color: #000; box-shadow: 4px 4px 0px #000; }
+        .search-input { transition: all 0.2s ease; }
+        .nl-input:focus { outline: none; border-color: #000; }
+
+        .featured-card { transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .featured-card:hover { transform: translateY(-6px); box-shadow: 10px 14px 0px #000; }
+        .featured-card:hover .featured-img { transform: scale(1.03); }
+        .featured-img { transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+
+        .tag-hover:hover { background: #000; color: #fff; }
+        .page-num { transition: all 0.2s ease; cursor: pointer; }
+        .page-num:hover, .page-num.active { background: #000; color: #fff; border-color: #000; }
+
+        .sidebar-sticky { position: sticky; top: 100px; }
+
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-up { animation: fadeUp 0.7s ease-out forwards; }
+        .delay-1 { animation-delay: 0.1s; opacity: 0; }
+        .delay-2 { animation-delay: 0.2s; opacity: 0; }
+        .delay-3 { animation-delay: 0.3s; opacity: 0; }
+        .delay-4 { animation-delay: 0.4s; opacity: 0; }
+
+        .skeleton { background: linear-gradient(90deg,#eee 25%,#f5f5f5 37%,#eee 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; }
+        @keyframes shimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <header class="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-black/5">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="/services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                <a href="/index.html#work" class="hover:opacity-60 transition-opacity">Work</a>
+            </nav>
+            <a href="/index.html" class="text-2xl font-black tracking-tighter">ADDRO</a>
+            <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                <a href="/about.html" class="hover:opacity-60 transition-opacity">About</a>
+                <a href="/index.html#contact" class="hover:opacity-60 transition-opacity">Contact</a>
+            </nav>
+            <button class="md:hidden p-2" aria-label="Menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Blog Hero -->
+    <section class="relative min-h-[60vh] flex flex-col items-center justify-center pt-24 pb-16 overflow-hidden grid-bg">
+        <div class="text-center z-10 max-w-4xl mx-auto px-6">
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-black/40 mb-6 animate-fade-up">The Addro Blog</p>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-6 animate-fade-up delay-1 leading-[0.95]">
+                Insights That<br><span class="underline decoration-4 underline-offset-4">Move</span> You Forward
+            </h1>
+            <p class="text-lg md:text-xl text-black/60 max-w-2xl mx-auto animate-fade-up delay-2 leading-relaxed">
+                Thoughts on web development, SEO, branding, motion design, and building Africa's digital future — from the team at Addro.
+            </p>
+            <div class="mt-10 max-w-xl mx-auto animate-fade-up delay-3">
+                <div class="relative">
+                    <input type="text" id="searchInput" placeholder="Search articles..." class="search-input w-full px-6 py-4 pl-14 rounded-full border-2 border-black/10 bg-white text-base">
+                    <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-black/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Category Pills -->
+    <section class="py-6 border-y border-black/10 bg-white sticky top-[65px] z-40">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex items-center gap-3 overflow-x-auto pb-2" id="categoryPills">
+                <span class="text-xs font-bold uppercase tracking-wider text-black/40 whitespace-nowrap mr-2">Filter:</span>
+                <button class="cat-pill active px-5 py-2 rounded-full border-2 border-black text-sm font-bold whitespace-nowrap" data-cat="All">All</button>
+                <!-- more categories injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <main class="max-w-7xl mx-auto px-6 py-16">
+        <div class="grid lg:grid-cols-12 gap-12">
+
+            <!-- Articles Column -->
+            <div class="lg:col-span-8">
+
+                <!-- Featured Post slot -->
+                <div id="featuredSlot"></div>
+
+                <!-- Article Grid -->
+                <div class="grid md:grid-cols-2 gap-8" id="postsGrid">
+                    <!-- skeleton loaders, replaced by JS -->
+                    <div class="h-80 rounded-2xl skeleton"></div>
+                    <div class="h-80 rounded-2xl skeleton"></div>
+                    <div class="h-80 rounded-2xl skeleton"></div>
+                    <div class="h-80 rounded-2xl skeleton"></div>
+                </div>
+
+                <div id="emptyState" class="hidden text-center py-20">
+                    <p class="text-2xl font-black tracking-tight mb-2">No articles found</p>
+                    <p class="text-black/50">Try a different search term or category.</p>
+                </div>
+
+                <!-- Pagination -->
+                <div class="mt-16 flex items-center justify-center gap-2 animate-fade-up" id="pagination"></div>
+            </div>
+
+            <!-- Sidebar -->
+            <aside class="lg:col-span-4">
+                <div class="sidebar-sticky space-y-8">
+
+                    <div class="border-2 border-black rounded-2xl p-6 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-fade-up">
+                        <h3 class="font-bold text-lg mb-4">About This Blog</h3>
+                        <p class="text-black/60 text-sm leading-relaxed mb-4">
+                            Written by the team at <strong>Addro</strong> — Africa's digital foundation. We share what we learn building projects across the continent.
+                        </p>
+                    </div>
+
+                    <div class="border-2 border-black rounded-2xl p-6 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-fade-up delay-1">
+                        <h3 class="font-bold text-lg mb-4">Categories</h3>
+                        <ul class="space-y-2" id="categoryList">
+                            <!-- injected by JS -->
+                        </ul>
+                    </div>
+
+                    <div class="border-2 border-black rounded-2xl p-6 bg-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-fade-up delay-2">
+                        <h3 class="font-bold text-lg mb-4">Most Read</h3>
+                        <div class="space-y-4" id="popularPosts">
+                            <!-- injected by JS -->
+                        </div>
+                    </div>
+
+                    <div class="border-2 border-black rounded-2xl p-6 bg-black text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] animate-fade-up delay-4">
+                        <h3 class="font-bold text-lg mb-2">Stay in the Loop</h3>
+                        <p class="text-white/60 text-sm mb-4">Get our best insights delivered to your inbox. No spam, just value.</p>
+                        <div class="space-y-3">
+                            <input type="email" placeholder="you@company.com" class="nl-input w-full px-4 py-3 rounded-xl border-2 border-white/20 bg-white/10 text-white placeholder-white/40 text-sm" disabled>
+                            <button class="w-full bg-white/40 text-black py-3 rounded-xl font-bold text-sm cursor-not-allowed" disabled>Coming soon</button>
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">
+                        Africa's digital foundation. Building digital products that matter.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="/services.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="/services.html" class="hover:text-white transition-colors">Branding</a></li>
+                        <li><a href="/services.html" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                        <li><a href="/services.html" class="hover:text-white transition-colors">Photo/Video Editing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="/index.html#work" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="/about.html" class="hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="/blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="/index.html#contact" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="https://www.instagram.com/addrotech/" target="_blank" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ============================================
+         FIREBASE — fetch published posts
+    ============================================ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import {
+            getFirestore, collection, query, where, orderBy, getDocs
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Same config as admin/login.html and admin/editor.html
+         const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const POSTS_PER_PAGE = 8;
+        let allPosts = [];
+        let filteredPosts = [];
+        let activeCategory = "All";
+        let searchTerm = "";
+        let currentPage = 1;
+
+        /* ---- FETCH ---- */
+        async function loadPosts() {
+            const q = query(
+                collection(db, "posts"),
+                where("status", "==", "published"),
+                orderBy("publishedAt", "desc")
+            );
+            const snap = await getDocs(q);
+            allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+            buildCategoryUI();
+            applyFilters();
+        }
+
+        /* ---- CATEGORY PILLS + SIDEBAR LIST ---- */
+        function buildCategoryUI() {
+            const counts = {};
+            allPosts.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
+            const cats = Object.keys(counts).sort();
+
+            const pillWrap = document.getElementById('categoryPills');
+            cats.forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = "cat-pill px-5 py-2 rounded-full border-2 border-black text-sm font-bold whitespace-nowrap";
+                btn.dataset.cat = cat;
+                btn.textContent = cat;
+                btn.addEventListener('click', () => setCategory(cat));
+                pillWrap.appendChild(btn);
+            });
+            pillWrap.querySelector('[data-cat="All"]').addEventListener('click', () => setCategory('All'));
+
+            const listWrap = document.getElementById('categoryList');
+            listWrap.innerHTML = cats.map((cat, i) => `
+                <li><a href="#" data-cat="${cat}" class="sidebar-link cat-sidebar-link flex items-center justify-between text-sm text-black/60 py-1 ${i < cats.length - 1 ? 'border-b border-black/5' : ''}">
+                    <span>${cat}</span><span class="bg-neutral-100 px-2 py-0.5 rounded-full text-xs font-bold">${counts[cat]}</span>
+                </a></li>
+            `).join('');
+            listWrap.querySelectorAll('.cat-sidebar-link').forEach(a => {
+                a.addEventListener('click', (e) => { e.preventDefault(); setCategory(a.dataset.cat); window.scrollTo({top:0,behavior:'smooth'}); });
+            });
+
+            // Most read — falls back to most recent if no "views" field tracked yet
+            const popular = [...allPosts].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 3);
+            document.getElementById('popularPosts').innerHTML = popular.map(p => `
+                <a href="/blog/post.html?slug=${encodeURIComponent(p.slug)}" class="group flex gap-4">
+                    <div class="w-16 h-16 rounded-xl overflow-hidden border border-black/10 flex-shrink-0">
+                        <img src="${p.coverImage || fallbackImg()}" alt="${escapeHtml(p.title)}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm leading-snug group-hover:underline">${escapeHtml(p.title)}</h4>
+                        <p class="text-black/40 text-xs mt-1">${formatDate(p.publishedAt)} • ${readingTime(p.content)}</p>
+                    </div>
+                </a>
+            `).join('');
+        }
+
+        function setCategory(cat) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-pill').forEach(p => p.classList.toggle('active', p.dataset.cat === cat));
+            currentPage = 1;
+            applyFilters();
+        }
+
+        /* ---- SEARCH ---- */
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchTerm = e.target.value.trim().toLowerCase();
+            currentPage = 1;
+            applyFilters();
+        });
+
+        /* ---- FILTER + RENDER ---- */
+        function applyFilters() {
+            filteredPosts = allPosts.filter(p => {
+                const matchesCat = activeCategory === "All" || p.category === activeCategory;
+                const matchesSearch = !searchTerm ||
+                    p.title.toLowerCase().includes(searchTerm) ||
+                    (p.excerpt || "").toLowerCase().includes(searchTerm);
+                return matchesCat && matchesSearch;
+            });
+            render();
+        }
+
+        function render() {
+            const grid = document.getElementById('postsGrid');
+            const featuredSlot = document.getElementById('featuredSlot');
+            const emptyState = document.getElementById('emptyState');
+
+            if (filteredPosts.length === 0) {
+                grid.innerHTML = "";
+                featuredSlot.innerHTML = "";
+                emptyState.classList.remove('hidden');
+                document.getElementById('pagination').innerHTML = "";
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            // Featured = most recent post, only shown on page 1 with no active search/category narrowing
+            const showFeatured = currentPage === 1;
+            const featured = showFeatured ? filteredPosts[0] : null;
+            const rest = showFeatured ? filteredPosts.slice(1) : filteredPosts;
+
+            featuredSlot.innerHTML = featured ? featuredCardHTML(featured) : "";
+
+            const start = (currentPage - 1) * POSTS_PER_PAGE;
+            const pagePosts = rest.slice(start, start + POSTS_PER_PAGE);
+            grid.innerHTML = pagePosts.map(cardHTML).join("");
+
+            renderPagination(rest.length);
+        }
+
+        function featuredCardHTML(p) {
+            return `
+            <article class="featured-card bg-white border-2 border-black rounded-3xl overflow-hidden shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-12 animate-fade-up">
+                <a href="/blog/post.html?slug=${encodeURIComponent(p.slug)}">
+                    <div class="relative overflow-hidden">
+                        <img src="${p.coverImage || fallbackImg()}" alt="${escapeHtml(p.title)}" class="featured-img w-full h-64 md:h-80 object-cover">
+                        <div class="absolute top-4 left-4">
+                            <span class="bg-black text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider">Latest</span>
+                        </div>
+                    </div>
+                    <div class="p-8 md:p-10">
+                        <div class="flex flex-wrap items-center gap-4 mb-4 text-sm text-black/50">
+                            <span class="bg-neutral-100 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider text-black/70">${escapeHtml(p.category)}</span>
+                            <span>${formatDate(p.publishedAt)}</span>
+                            <span>•</span>
+                            <span>${readingTime(p.content)}</span>
+                        </div>
+                        <h2 class="text-3xl md:text-4xl font-black tracking-tighter mb-4 leading-tight">${escapeHtml(p.title)}</h2>
+                        <p class="text-black/60 text-lg leading-relaxed mb-6">${escapeHtml(p.excerpt || "")}</p>
+                        <div class="flex items-center justify-between">
+                            <span class="font-bold text-sm">${escapeHtml(p.author || "Addro Team")}</span>
+                            <span class="text-sm font-bold border-b-2 border-black pb-0.5">Read Article →</span>
+                        </div>
+                    </div>
+                </a>
+            </article>`;
+        }
+
+        function cardHTML(p) {
+            return `
+            <article class="blog-card bg-white border-2 border-black rounded-2xl overflow-hidden shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] animate-fade-up">
+                <a href="/blog/post.html?slug=${encodeURIComponent(p.slug)}">
+                    <div class="relative overflow-hidden h-48">
+                        <img src="${p.coverImage || fallbackImg()}" alt="${escapeHtml(p.title)}" class="card-img w-full h-full object-cover">
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center gap-3 mb-3 text-xs text-black/50">
+                            <span class="bg-neutral-100 px-2.5 py-1 rounded-full font-bold uppercase tracking-wider text-black/70">${escapeHtml(p.category)}</span>
+                            <span>${formatDate(p.publishedAt)}</span>
+                        </div>
+                        <h3 class="text-xl font-bold tracking-tight mb-3 leading-snug">${escapeHtml(p.title)}</h3>
+                        <p class="text-black/60 text-sm leading-relaxed mb-4">${escapeHtml(p.excerpt || "")}</p>
+                        <span class="text-xs font-medium text-black/50">${escapeHtml(p.author || "Addro Team")} • ${readingTime(p.content)}</span>
+                    </div>
+                </a>
+            </article>`;
+        }
+
+        function renderPagination(totalCount) {
+            const totalPages = Math.max(1, Math.ceil(totalCount / POSTS_PER_PAGE));
+            const wrap = document.getElementById('pagination');
+            if (totalPages <= 1) { wrap.innerHTML = ""; return; }
+
+            let html = `<button class="page-num px-4 py-2 rounded-lg border-2 border-black text-sm font-bold" id="prevPage">←</button>`;
+            for (let i = 1; i <= totalPages; i++) {
+                html += `<button class="page-num ${i === currentPage ? 'active' : ''} px-4 py-2 rounded-lg border-2 border-black text-sm font-bold" data-page="${i}">${i}</button>`;
+            }
+            html += `<button class="page-num px-4 py-2 rounded-lg border-2 border-black text-sm font-bold" id="nextPage">→</button>`;
+            wrap.innerHTML = html;
+
+            wrap.querySelectorAll('[data-page]').forEach(btn => {
+                btn.addEventListener('click', () => { currentPage = parseInt(btn.dataset.page); render(); window.scrollTo({top:0,behavior:'smooth'}); });
+            });
+            document.getElementById('prevPage')?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; render(); } });
+            document.getElementById('nextPage')?.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; render(); } });
+        }
+
+        /* ---- HELPERS ---- */
+        function formatDate(ts) {
+            if (!ts) return "";
+            const d = ts.toDate ? ts.toDate() : new Date(ts);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        function readingTime(html) {
+            if (!html) return "1 min read";
+            const words = html.replace(/<[^>]+>/g, ' ').trim().split(/\s+/).length;
+            return `${Math.max(1, Math.round(words / 200))} min read`;
+        }
+        function fallbackImg() { return "/assets/blog-fallback.jpg"; }
+        function escapeHtml(str) {
+            return (str || "").replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+        }
+
+        loadPosts().catch(err => {
+            console.error("Failed to load posts:", err);
+            document.getElementById('postsGrid').innerHTML = `<p class="text-black/50 col-span-2">Couldn't load posts right now. Please refresh.</p>`;
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Development — Apps People Keep | Addro Tech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 60; background: white; padding: 0.75rem 2rem; border-radius: 9999px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .modal-overlay { backdrop-filter: blur(10px); background: rgba(0,0,0,0.3); }
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        
+        .phone-mockup {
+            border: 12px solid #000;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+            box-shadow: 20px 20px 0px rgba(0,0,0,0.15);
+        }
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 28px;
+            background: #000;
+            border-bottom-left-radius: 16px;
+            border-bottom-right-radius: 16px;
+            z-index: 10;
+        }
+        
+        .app-card {
+            border: 2px solid #000;
+            border-radius: 20px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 0px #000;
+        }
+        .app-card:hover { transform: translateY(-6px); box-shadow: 8px 10px 0px #000; }
+        
+        .platform-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border: 2px solid #000;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 700;
+            background: white;
+        }
+        
+        .process-card {
+            border: 2px solid #000;
+            border-radius: 20px;
+            padding: 32px;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 0px #000;
+        }
+        .process-card:hover { transform: translateY(-4px); box-shadow: 6px 8px 0px #000; }
+        
+        .faq-item { border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
+        .faq-icon { transition: transform 0.3s ease; }
+        .faq-item.open .faq-icon { transform: rotate(45deg); }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../index.html" class="hover:opacity-60 transition-opacity">Home</a>
+                    <a href="../services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                </nav>
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()"><h1 class="text-2xl font-black tracking-tighter">ADDRO</h1></div>
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../academy.html" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="../contact.html" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                <button class="md:hidden p-2" onclick="toggleHeader()"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+            </div>
+        </div>
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="../index.html" onclick="toggleHeader()">Home</a>
+                <a href="../services.html" onclick="toggleHeader()">Services</a>
+                <a href="../index.html#academy" onclick="toggleHeader()">Academy</a>
+                <a href="../contact.html" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-20 px-6 bg-white relative overflow-hidden min-h-screen flex items-center">
+        <div class="absolute inset-0 grid-bg opacity-40"></div>
+        <div class="max-w-7xl mx-auto w-full relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-up">
+                    <p class="text-sm font-medium tracking-widest uppercase mb-6 text-black/50">App Development</p>
+                    <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 leading-[0.95]">
+                        Apps People<br>
+                        Actually<br>
+                        Keep.
+                    </h1>
+                    <p class="text-xl text-black/60 mb-10 leading-relaxed max-w-lg">
+                        Web apps. Native Android. Native iOS. Cross-platform. We build apps that load fast, feel smooth, and don't get deleted after one use.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="openModal()" class="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)]">Build My App</button>
+                        <a href="#process" class="border-2 border-black px-8 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all text-center">See the Process</a>
+                    </div>
+                    <div class="flex gap-4 mt-8">
+                        <span class="platform-badge"><svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="currentColor" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10 10-4.49 10-10S17.51 2 12 2M4 12c0-.9.16-1.76.43-2.57L6 11l2 2v2l2 2 1 1v1.93c-3.94-.49-7-3.86-7-7.93m14.33 4.87c-.65-.53-1.64-.87-2.33-.87v-1c0-1.1-.9-2-2-2h-4v-3c1.1 0 2-.9 2-2V7h1c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 1.83-.63 3.52-1.67 4.87"/>
+</svg> Web Apps</span>
+                        <span class="platform-badge"><svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="currentColor" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M21.94 17.56s-.01-.08-.02-.12a10 10 0 0 0-1-2.99c-.48-.92-1.1-1.76-1.83-2.49a10.4 10.4 0 0 0-1.77-1.41s0-.01.01-.02c.2-.35.4-.7.61-1.05l.59-1.02c.14-.24.28-.49.42-.73.14-.25.16-.55.05-.82a.93.93 0 0 0-.38-.43c-.12-.07-.25-.11-.39-.13h-.17c-.29.03-.55.2-.7.45-.14.24-.28.49-.42.73l-.59 1.02c-.2.35-.4.7-.61 1.05-.02.04-.04.08-.07.11-.03-.01-.06-.02-.09-.04-1.11-.42-2.32-.66-3.58-.66h-.1a10 10 0 0 0-3.55.69c-.02-.04-.04-.07-.06-.11-.2-.35-.4-.7-.61-1.05l-.59-1.02c-.14-.24-.28-.49-.42-.73a.9.9 0 0 0-.87-.45c-.14.01-.27.05-.39.13-.13.08-.24.19-.32.32l-.06.12c-.09.2-.1.43-.03.64.02.06.05.12.08.18.14.24.28.49.42.73.2.34.39.68.59 1.02.2.35.4.7.61 1.05-.41.25-.79.53-1.16.84-.66.55-1.24 1.18-1.73 1.88a10.021 10.021 0 0 0-1.73 4.18c0 .04-.01.08-.02.12l-.06.44h20l-.06-.44ZM8.13 14.82c-.33.49-.92.68-1.32.41s-.46-.88-.13-1.38c.33-.49.92-.68 1.32-.41s.46.88.13 1.38m9.07.41c-.4.27-.99.08-1.32-.41s-.27-1.11.13-1.38.99-.08 1.32.41.27 1.11-.13 1.38"/>
+</svg> Android</span>
+                        <span class="platform-badge"><svg  xmlns="http://www.w3.org/2000/svg" width="24" height="24"  
+fill="currentColor" viewBox="0 0 24 24" >
+<!--Boxicons v3.0.8 https://boxicons.com | License  https://docs.boxicons.com/free-->
+<path d="M19.665 16.811a10.3 10.3 0 0 1-1.021 1.837q-.807 1.15-1.316 1.592-.787.723-1.692.744-.649.001-1.562-.373-.914-.372-1.683-.371-.805-.001-1.73.371-.924.375-1.495.393-.866.038-1.729-.764-.55-.48-1.377-1.648-.885-1.245-1.455-2.891-.61-1.78-.611-3.447 0-1.91.826-3.292a4.86 4.86 0 0 1 1.73-1.751 4.65 4.65 0 0 1 2.34-.662q.69.001 1.81.422c1.12.421 1.227.422 1.436.422q.237 0 1.593-.498 1.279-.46 2.163-.384 2.4.192 3.6 1.895-2.145 1.301-2.123 3.637.02 1.82 1.317 3.023a4.3 4.3 0 0 0 1.315.863q-.159.46-.336.882M15.998 2.38q-.001 1.426-1.039 2.659c-.836.976-1.846 1.541-2.941 1.452a3 3 0 0 1-.021-.36c0-.913.396-1.889 1.103-2.688q.528-.606 1.343-1.009.813-.397 1.536-.435.02.192.019.381"/>
+</svg> iOS</span>
+                    </div>
+                </div>
+                
+                <!-- Phone Mockup -->
+                <div class="flex justify-center fade-up">
+                    <div class="phone-mockup w-72 h-[580px]">
+                        <div class="phone-notch"></div>
+                        <div class="w-full h-full bg-white relative overflow-hidden">
+                            <img src="../Gemini_Generated_Image_trhswftrhswftrhs.jpeg" class="w-full h-full object-cover" alt="App mockup">
+                            <div class="absolute bottom-0 left-0 right-0 bg-white/90 backdrop-blur p-4 border-t border-black/10">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 bg-black rounded-xl flex items-center justify-center text-white font-bold text-lg">A</div>
+                                    <div>
+                                        <p class="font-bold text-sm">AddroAPP</p>
+                                        <p class="text-xs text-black/50">Tech • 4.9★</p>
+                                    </div>
+                                    <button class="ml-auto bg-black text-white text-xs font-bold px-4 py-2 rounded-full">GET</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem -->
+    <section class="py-20 px-6 bg-neutral-50">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-black tracking-tighter mb-4 fade-up">The App Graveyard</h2>
+            <p class="text-black/60 mb-16 fade-up">Most apps fail before they get a fair shot. Here's why.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">🐌</div>
+                    <h3 class="font-bold text-lg mb-2">The Sluggish Mess</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">5 seconds to load. Janky scrolling. Buttons that don't respond. Users delete slow apps before they even see what you built.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">📱</div>
+                    <h3 class="font-bold text-lg mb-2">The "Works on My Phone"</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Looks great on the developer's iPhone 15 Pro. Crashes on a Samsung A12. No testing on real devices, no optimization for low-end hardware.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">🔋</div>
+                    <h3 class="font-bold text-lg mb-2">The Battery Vampire</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Poorly written code drains battery, hogs memory, and heats up phones. Users blame YOU — then uninstall and leave a 1-star review.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-4 fade-up">What We Build</h2>
+                <p class="text-black/60 fade-up">Every platform. Every use case. Every pixel polished.</p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="app-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=600&h=350&fit=crop" class="w-full h-full object-cover" alt="Web app">
+                        <div class="absolute top-4 left-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">WEB APPS</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Progressive Web Apps</h3>
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Installable, offline-capable web apps that feel native. Push notifications, camera access, geolocation — all through the browser. No app store gatekeeping.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">React</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Next.js</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Vue</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">PWA</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1607252650355-f7fd0460ccdb?w=600&h=350&fit=crop" class="w-full h-full object-cover" alt="Android app">
+                        <div class="absolute top-4 left-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">ANDROID</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Native Android Apps</h3>
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Kotlin-built, Material Design-compliant apps that respect the Android ecosystem. Optimized for fragmentation — from budget phones to foldables.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Kotlin</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Jetpack Compose</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Play Store</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=600&h=350&fit=crop" class="w-full h-full object-cover" alt="iOS app">
+                        <div class="absolute top-4 left-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">iOS</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Native iOS Apps</h3>
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Swift-built apps that feel at home on iPhone and iPad. Human Interface Guidelines compliant, smooth animations, and App Store optimized from day one.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Swift</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">SwiftUI</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">App Store</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-card fade-up">
+                    <div class="h-48 bg-neutral-100 border-b-2 border-black overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1526498460520-4c246339dccb?w=600&h=350&fit=crop" class="w-full h-full object-cover" alt="Cross platform">
+                        <div class="absolute top-4 left-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">CROSS-PLATFORM</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Cross-Platform Apps</h3>
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">One codebase, two platforms. React Native or Flutter apps that look and feel native on both iOS and Android. Faster to market, easier to maintain.</p>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">React Native</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Flutter</span>
+                            <span class="text-xs bg-neutral-100 px-3 py-1 rounded-full font-medium">Dart</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Also Included -->
+            <div class="bg-black text-white rounded-3xl p-8 md:p-12 fade-up">
+                <h3 class="text-2xl font-black mb-8 text-center">Every App Ships With</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <h4 class="font-bold mb-1">Push Notifications</h4>
+                            <p class="text-sm text-white/60">Firebase Cloud Messaging or OneSignal integration.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <h4 class="font-bold mb-1">Offline Support</h4>
+                            <p class="text-sm text-white/60">Local caching so your app works without signal.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <h4 class="font-bold mb-1">Analytics Setup</h4>
+                            <p class="text-sm text-white/60">Firebase Analytics or Mixpanel — track what matters.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <h4 class="font-bold mb-1">Authentication</h4>
+                            <p class="text-sm text-white/60">Email, Google, Apple, and social logins.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <h4 class="font-bold mb-1">App Store Submission</h4>
+                            <p class="text-sm text-white/60">We handle the paperwork, screenshots, and review process.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-white text-black rounded-lg flex items-center justify-center font-bold flex-shrink-0">✓</div>
+                        <div>
+                            <h4 class="font-bold mb-1">Source Code Handoff</h4>
+                            <p class="text-sm text-white/60">Full repo access, documentation, and setup guide.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process -->
+    <section id="process" class="py-24 px-6 bg-neutral-50">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">From Idea to App Store</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">No surprises. No black boxes. Just a clear path to launch.</p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div class="process-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">1</div>
+                    <h3 class="font-bold text-lg mb-2">Scope & UX</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">We map user flows, wireframes, and technical architecture. Every screen planned before a line of code.</p>
+                </div>
+                <div class="process-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">2</div>
+                    <h3 class="font-bold text-lg mb-2">UI Design</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">High-fidelity screens, design systems, and interactive prototypes. You see the app before we build it.</p>
+                </div>
+                <div class="process-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">3</div>
+                    <h3 class="font-bold text-lg mb-2">Development</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Sprint-based builds with bi-weekly demos. Clean, documented code following platform best practices.</p>
+                </div>
+                <div class="process-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">4</div>
+                    <h3 class="font-bold text-lg mb-2">Testing</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Real-device testing on 10+ devices. Performance profiling, crash testing, and user acceptance validation.</p>
+                </div>
+                <div class="process-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center font-bold text-lg mb-4">5</div>
+                    <h3 class="font-bold text-lg mb-2">Launch & Support</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">App Store submission, launch strategy, and 60-day post-launch support. We stay after you ship.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">Shipped & Loved</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Real apps. Real stores. Real users.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="bg-neutral-100 p-6 border-b-2 border-black">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-black text-white text-xs font-bold px-3 py-1 rounded-full">FINTECH</span>
+                            <div class="flex gap-1">
+                                <span class="text-yellow-500">★</span><span class="text-yellow-500">★</span><span class="text-yellow-500">★</span><span class="text-yellow-500">★</span><span class="text-yellow-500">★</span>
+                                <span class="text-sm font-bold ml-1">4.9</span>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-black tracking-tighter">AddroPay Wallet</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Cross-platform fintech app built with Flutter. Features include QR payments, transaction history, biometric auth, and real-time balance updates. Live on Play Store and App Store.</p>
+                        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">50K+</p>
+                                <p class="text-xs text-black/50">Downloads</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">4.9★</p>
+                                <p class="text-xs text-black/50">Rating</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">2</p>
+                                <p class="text-xs text-black/50">Platforms</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="#" class="flex-1 bg-black text-white text-center py-2 rounded-lg text-sm font-bold hover:scale-105 transition-transform">Play Store</a>
+                            <a href="#" class="flex-1 bg-black text-white text-center py-2 rounded-lg text-sm font-bold hover:scale-105 transition-transform">App Store</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="bg-neutral-100 p-6 border-b-2 border-black">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-black text-white text-xs font-bold px-3 py-1 rounded-full">HEALTHCARE</span>
+                            <div class="flex gap-1">
+                                <span class="text-yellow-500">★</span><span class="text-yellow-500">★</span><span class="text-yellow-500">★</span><span class="text-yellow-500">★</span><span class="text-yellow-500">★</span>
+                                <span class="text-sm font-bold ml-1">4.8</span>
+                            </div>
+                        </div>
+                        <h3 class="text-2xl font-black tracking-tighter">MediConnect</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Native iOS and Android telehealth app. Video consultations, appointment booking, prescription tracking, and push reminders. Built with Swift and Kotlin separately for maximum performance.</p>
+                        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">12K+</p>
+                                <p class="text-xs text-black/50">Patients</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">4.8★</p>
+                                <p class="text-xs text-black/50">Rating</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">2</p>
+                                <p class="text-xs text-black/50">Native Builds</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <a href="#" class="flex-1 bg-black text-white text-center py-2 rounded-lg text-sm font-bold hover:scale-105 transition-transform">Play Store</a>
+                            <a href="#" class="flex-1 bg-black text-white text-center py-2 rounded-lg text-sm font-bold hover:scale-105 transition-transform">App Store</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-20 px-6 bg-black text-white">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Investment</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">MVP App</h3>
+                    <p class="text-4xl font-black mb-4">$5,500</p>
+                    <p class="text-sm text-white/60 mb-6">Validate fast. One core feature. One platform.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Single platform (iOS or Android)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Up to 5 screens</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Basic auth + database</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>App store submission</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>6–8 week timeline</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Start MVP</button>
+                </div>
+                
+                <div class="bg-white text-black rounded-2xl p-8 relative fade-up">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
+                    <h3 class="text-sm uppercase tracking-widest text-black/50 mb-2">Full Product</h3>
+                    <p class="text-4xl font-black mb-4">$15,000</p>
+                    <p class="text-sm text-black/60 mb-6">The complete app. Both platforms. All features.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>iOS + Android (or cross-platform)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Up to 15 screens</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>API + admin dashboard</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Push notifications + analytics</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Payment integration</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>12–16 week timeline</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full bg-black text-white py-3 rounded-full font-bold hover:scale-105 transition-transform">Build It</button>
+                </div>
+                
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Enterprise</h3>
+                    <p class="text-4xl font-black mb-4">Custom</p>
+                    <p class="text-sm text-white/60 mb-6">Complex systems. Multiple apps. Dedicated team.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Multiple apps / platforms</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Custom backend infrastructure</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Dedicated dev team</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Ongoing maintenance & updates</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>SLA & priority support</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Talk to Us</button>
+                </div>
+            </div>
+            <p class="text-center text-white/40 text-sm mt-8 fade-up">All prices exclude App Store / Play Store developer fees ($99/$25 annually).</p>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">App Questions</h2>
+            <div class="space-y-0">
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Should I build native or cross-platform?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Cross-platform (Flutter/React Native) is faster and cheaper — great for MVPs and most business apps. Native (Swift/Kotlin) wins when you need heavy animations, AR, or platform-specific features. We'll recommend the right path based on your feature list and budget.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">How long does it take to build an app?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">MVP: 6–8 weeks. Full product: 12–16 weeks. Complex enterprise apps: 5–6 months. We break projects into sprints so you see working builds every two weeks — not just a big reveal at the end.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Do you handle app store submission?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Yes — it's included in every package. We prepare screenshots, descriptions, privacy policies, and handle the review process. If Apple or Google rejects the app, we fix the issues and resubmit at no extra cost.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Will I own the source code?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">100%. Full GitHub repo access, documentation, and setup instructions. We don't use proprietary frameworks or lock you in. Any competent developer can pick up where we left off.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What about maintenance after launch?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Every app includes 60 days of post-launch support. After that, we offer maintenance retainers starting at $800/month — covering OS updates, bug fixes, feature additions, and store compliance updates. We don't ghost you after launch.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter fade-up">Your App Idea<br>Deserves to Exist.</h2>
+            <p class="text-xl text-black/60 mb-12 fade-up">Stop sketching on napkins. Let's get it on the App Store.</p>
+            <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] fade-up">Build My App</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">Africa's leading tech agency. Building digital products that matter.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="webdesign.html" class="hover:text-white transition-colors">Web Design</a></li>
+                        <li><a href="softwaredevelopment.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="appdev.html" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="seo.html" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="../services.html" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="../academy.html" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="../blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="../contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <h3 class="text-2xl font-black mb-2">Build My App</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your app idea and we'll scope it within 24 hours.</p>
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-1">Business Name</label><input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name"></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium mb-1">Platform</label><select name="platform" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>iOS</option><option>Android</option><option>Both (Native)</option><option>Both (Cross-platform)</option><option>Web App</option><option>Not sure</option></select></div>
+                        <div><label class="block text-sm font-medium mb-1">Budget Range</label><select name="budget" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>Under $5K</option><option>$5K – $10K</option><option>$10K – $20K</option><option>$20K+</option><option>Not sure yet</option></select></div>
+                    </div>
+                    <div><label class="block text-sm font-medium mb-1">App Description</label><textarea name="appDescription" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="What does your app do? Who are the users? Key features?"></textarea></div>
+                    <div><label class="block text-sm font-medium mb-1">Do you have designs?</label><select name="hasDesigns" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>No, need design too</option><option>Yes, designs ready</option><option>Wireframes only</option></select></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium mb-1">Company Email</label><input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com"></div>
+                        <div><label class="block text-sm font-medium mb-1">Phone Number</label><input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234..."></div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2 flex items-center justify-center gap-2">
+                        <span id="btnText">Submit App Request</span>
+                        <div id="btnSpinner" class="spinner hidden"></div>
+                    </button>
+                </form>
+            </div>
+            
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Let's turn that idea into an app.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config — SWAP WITH YOUR REAL VALUES
+       const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("Firebase connected");
+        } catch (e) {
+            console.log("Firebase not configured yet — form will log to console");
+        }
+
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            if (window.innerWidth < 768) { mobileNav.classList.toggle('hidden'); return; }
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) { header.querySelector('.header-inner').classList.add('header-collapsed'); logo.classList.add('expanded'); }
+            else { header.querySelector('.header-inner').classList.remove('header-collapsed'); logo.classList.remove('expanded'); }
+        }
+
+        function toggleFaq(item) { document.querySelectorAll('.faq-item').forEach(el => { if (el !== item) el.classList.remove('open'); }); item.classList.toggle('open'); }
+
+        function openModal() { const modal = document.getElementById('projectModal'); const content = document.getElementById('modalContent'); modal.classList.remove('hidden'); setTimeout(() => { content.classList.remove('scale-95','opacity-0'); content.classList.add('scale-100','opacity-100'); }, 10); }
+
+        function closeModal() { 
+            const modal = document.getElementById('projectModal'); 
+            const content = document.getElementById('modalContent'); 
+            const success = document.getElementById('successCard'); 
+            content.classList.add('scale-95','opacity-0'); 
+            content.classList.remove('scale-100','opacity-100'); 
+            success.classList.add('scale-95','opacity-0','hidden'); 
+            success.classList.remove('scale-100','opacity-100'); 
+            setTimeout(() => { 
+                modal.classList.add('hidden'); 
+                document.getElementById('projectForm').reset();
+                document.getElementById('btnText').textContent = 'Submit App Request';
+                document.getElementById('btnSpinner').classList.add('hidden');
+                document.getElementById('submitBtn').disabled = false;
+            }, 300); 
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const data = Object.fromEntries(new FormData(form));
+            data.timestamp = new Date().toISOString();
+            data.status = "new";
+
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const spinner = document.getElementById('btnSpinner');
+
+            btn.disabled = true;
+            btnText.textContent = 'Sending...';
+            spinner.classList.remove('hidden');
+
+            try {
+                if (db) {
+                    await db.collection('appProjects').add(data);
+                    console.log('Saved to Firebase:', data);
+                } else {
+                    console.log('Form data (Firebase not configured):', data);
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                document.getElementById('modalContent').classList.add('hidden');
+                const success = document.getElementById('successCard');
+                success.classList.remove('hidden');
+                setTimeout(() => { success.classList.remove('scale-95','opacity-0'); success.classList.add('scale-100','opacity-100'); }, 10);
+
+            } catch (error) {
+                console.error('Error saving:', error);
+                alert('Something went wrong. Please try again or email us directly.');
+                btn.disabled = false;
+                btnText.textContent = 'Submit App Request';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => { gsap.fromTo(elem, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: elem, start: 'top 85%', toggleActions: 'play none none none' }, delay: i * 0.05 }); });
+
+        window.addEventListener('scroll', () => { const header = document.getElementById('mainHeader'); if (window.pageYOffset > 100) header.classList.add('shadow-sm'); else header.classList.remove('shadow-sm'); });
+    </script>
+</body>
+</html>

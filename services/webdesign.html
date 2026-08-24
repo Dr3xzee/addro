@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Design — Websites That Convert | Addro Tech</title>
+    <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 60px 60px; }
+        }
+        
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { 
+            transform: translateY(-100%); 
+            opacity: 0;
+            pointer-events: none;
+        }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded {
+            position: fixed;
+            top: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 60;
+            background: white;
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        
+        .modal-overlay {
+            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        
+        .process-line {
+            position: absolute;
+            left: 24px;
+            top: 48px;
+            bottom: 0;
+            width: 2px;
+            background: rgba(0,0,0,0.1);
+        }
+        
+        .faq-item {
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+        }
+        .faq-item.open .faq-answer {
+            max-height: 300px;
+            padding-bottom: 20px;
+        }
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+        .faq-item.open .faq-icon {
+            transform: rotate(45deg);
+        }
+        
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../index.html" class="hover:opacity-60 transition-opacity">Home</a>
+                    <a href="../services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                </nav>
+                
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()">
+                    <h1 class="text-2xl font-black tracking-tighter">ADDRO</h1>
+                </div>
+                
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../academy.html" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="../contact.html" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                
+                <button class="md:hidden p-2" onclick="toggleHeader()">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+        
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="../index.html" onclick="toggleHeader()">Home</a>
+                <a href="../services.html" onclick="toggleHeader()">Services</a>
+                <a href="../academy.html" onclick="toggleHeader()">Academy</a>
+                <a href="../contact.html" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero / Headline -->
+    <section class="pt-32 pb-20 px-6 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-40"></div>
+        <div class="max-w-5xl mx-auto text-center relative z-10">
+            <p class="text-sm font-medium tracking-widest uppercase mb-6 text-black/50 fade-up">Web Design Service</p>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 leading-[0.95] fade-up">
+                Websites Designed<br>
+                to Convert Visitors<br>
+                Into Customers.
+            </h1>
+            <p class="text-xl text-black/60 max-w-2xl mx-auto mb-10 fade-up">
+                You bring the developer. We bring the pixel-perfect, conversion-focused design system that turns browsers into buyers.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center fade-up">
+                <button onclick="openModal()" class="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)]">
+                    Start a Web Design Project
+                </button>
+                <a href="#process" class="border-2 border-black px-8 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all">
+                    See Our Process
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem -->
+    <section class="py-20 px-6 bg-neutral-50">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-black tracking-tighter mb-6 fade-up">The Cost of Bad Design</h2>
+            <div class="grid md:grid-cols-3 gap-8 mt-12">
+                <div class="fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+                    <h3 class="font-bold mb-2">Lost Customers</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">75% of users judge credibility purely on design. If it looks sketchy, they bounce — and take their money with them.</p>
+                </div>
+                <div class="fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+                    <h3 class="font-bold mb-2">Low Trust</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Inconsistent fonts, clashing colors, and broken spacing signal unprofessionalism before you even say a word.</p>
+                </div>
+                <div class="fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+                    <h3 class="font-bold mb-2">Outdated Styling</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">A site that looks like 2016 tells visitors you're behind the curve — even if your product is cutting-edge.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-start">
+                <div class="fade-up">
+                    <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-6">What's Included</h2>
+                    <p class="text-black/60 text-lg mb-8">Everything your developer needs to build exactly what we designed — no guesswork, no back-and-forth.</p>
+                    
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div>
+                                <h4 class="font-bold">High-Fidelity UI Mockups</h4>
+                                <p class="text-sm text-black/60">Pixel-perfect designs for every page, every state, every breakpoint.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div>
+                                <h4 class="font-bold">Responsive Designs (Mobile → Desktop)</h4>
+                                <p class="text-sm text-black/60">Optimized layouts for every screen size, not just shrunken desktop views.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div>
+                                <h4 class="font-bold">Interactive Figma Prototype</h4>
+                                <p class="text-sm text-black/60">Clickable preview so you can feel the flow before a single line of code is written.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div>
+                                <h4 class="font-bold">Design System & Style Guide</h4>
+                                <p class="text-sm text-black/60">Colors, typography, spacing rules, and component library — your dev's best friend.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div>
+                                <h4 class="font-bold">Developer Handoff File</h4>
+                                <p class="text-sm text-black/60">Exported assets, CSS specs, and annotated Figma files ready for implementation.</p>
+                            </div>
+                        </li>
+                        <li class="flex items-start gap-4">
+                            <svg class="w-6 h-6 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div>
+                                <h4 class="font-bold">2 Rounds of Revisions</h4>
+                                <p class="text-sm text-black/60">Refine the direction based on your feedback until it's exactly right.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="relative fade-up">
+                    <div class="absolute inset-0 bg-black rounded-3xl transform rotate-2 translate-x-4 translate-y-4"></div>
+                    <img src="https://images.unsplash.com/photo-1581291518633-83b4ebd1d83e?w=600&h=750&fit=crop" 
+                         alt="Web design mockups on screen" 
+                         class="relative rounded-3xl w-full h-[600px] object-cover border-2 border-black">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process -->
+    <section id="process" class="py-24 px-6 bg-neutral-50">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-16 fade-up">How We Deliver</h2>
+            
+            <div class="relative space-y-12">
+                <div class="process-line hidden md:block"></div>
+                
+                <div class="relative flex gap-8 fade-up">
+                    <div class="hidden md:flex w-12 h-12 bg-black text-white rounded-full items-center justify-center font-bold text-lg flex-shrink-0 z-10">1</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold mb-4">1</div>
+                        <h3 class="text-xl font-bold mb-2">Discovery & Strategy</h3>
+                        <p class="text-black/60 leading-relaxed">We dig into your brand, audience, competitors, and goals. What action should visitors take? What feeling should they leave with? We lock the strategy before touching a pixel.</p>
+                    </div>
+                </div>
+                
+                <div class="relative flex gap-8 fade-up">
+                    <div class="hidden md:flex w-12 h-12 bg-black text-white rounded-full items-center justify-center font-bold text-lg flex-shrink-0 z-10">2</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold mb-4">2</div>
+                        <h3 class="text-xl font-bold mb-2">Wireframing & UX Flow</h3>
+                        <p class="text-black/60 leading-relaxed">Low-fidelity layouts mapping the user journey. We validate information hierarchy and conversion paths before adding visual polish.</p>
+                    </div>
+                </div>
+                
+                <div class="relative flex gap-8 fade-up">
+                    <div class="hidden md:flex w-12 h-12 bg-black text-white rounded-full items-center justify-center font-bold text-lg flex-shrink-0 z-10">3</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold mb-4">3</div>
+                        <h3 class="text-xl font-bold mb-2">Visual Design</h3>
+                        <p class="text-black/60 leading-relaxed">High-fidelity UI with your brand DNA baked in. Typography, color, imagery, micro-interactions — every detail crafted for impact and clarity.</p>
+                    </div>
+                </div>
+                
+                <div class="relative flex gap-8 fade-up">
+                    <div class="hidden md:flex w-12 h-12 bg-black text-white rounded-full items-center justify-center font-bold text-lg flex-shrink-0 z-10">4</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold mb-4">4</div>
+                        <h3 class="text-xl font-bold mb-2">Prototype & Review</h3>
+                        <p class="text-black/60 leading-relaxed">Interactive Figma prototype for you to click through. Two revision rounds ensure the design matches your vision perfectly.</p>
+                    </div>
+                </div>
+                
+                <div class="relative flex gap-8 fade-up">
+                    <div class="hidden md:flex w-12 h-12 bg-black text-white rounded-full items-center justify-center font-bold text-lg flex-shrink-0 z-10">5</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-full flex items-center justify-center font-bold mb-4">5</div>
+                        <h3 class="text-xl font-bold mb-2">Developer Handoff</h3>
+                        <p class="text-black/60 leading-relaxed">Organized Figma files, exported assets, spacing specs, and a walkthrough call with your developer. They build; we support if questions come up.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof / Case Studies -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">Proof It Works</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Real designs. Real results. Real businesses.</p>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <article class="group fade-up">
+                    <div class="relative overflow-hidden rounded-2xl border-2 border-black mb-6 bg-neutral-100">
+                        <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=700&h=450&fit=crop" alt="Fintech Dashboard" class="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute top-4 left-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">Fintech</div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Fintech Dashboard Redesign</h3>
+                    <p class="text-black/60 mb-4 leading-relaxed">Complete UI overhaul for a Lagos-based fintech startup. We redesigned their analytics dashboard focusing on data clarity and user trust. Result: 40% increase in daily active users post-launch.</p>
+                    <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">Read Full Case Study →</a>
+                </article>
+                
+                <article class="group fade-up">
+                    <div class="relative overflow-hidden rounded-2xl border-2 border-black mb-6 bg-neutral-100">
+                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=700&h=450&fit=crop" alt="SaaS Landing Page" class="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105">
+                        <div class="absolute top-4 left-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">SaaS</div>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">SaaS Landing Page Design</h3>
+                    <p class="text-black/60 mb-4 leading-relaxed">Designed a conversion-focused landing page for an African SaaS company entering the market. Clean hierarchy, strong CTAs, and social proof placement. Result: 3x improvement in trial sign-ups.</p>
+                    <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">Read Full Case Study →</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing Hint -->
+    <section class="py-20 px-6 bg-black text-white">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-6 fade-up">Investment</h2>
+            <p class="text-white/60 text-lg mb-8 fade-up">Transparent pricing. No hidden fees. No surprises.</p>
+            
+            <div class="bg-white/5 border border-white/10 rounded-3xl p-8 md:p-12 inline-block fade-up">
+                <p class="text-sm uppercase tracking-widest text-white/50 mb-2">Web Design Projects Start From</p>
+                <p class="text-6xl md:text-7xl font-black mb-4">$250</p>
+                <p class="text-white/60 text-sm max-w-sm mx-auto mb-8">Final quote depends on page count, complexity, and revision needs. Every project gets a custom proposal.</p>
+                <a href="#" class="inline-block border-2 border-white text-white px-8 py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all text-sm">
+                    View Full Pricing Breakdown →
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Questions? Answered.</h2>
+            
+            <div class="space-y-0">
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Do you also develop the website, or just design it?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">This service is design-only. We deliver Figma files, prototypes, and developer-ready assets. If you already have a developer, they can build directly from our handoff. Need development too? Check our <a href="#" class="underline font-medium">Web Development</a> service — we offer a bundled package.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">How long does a typical web design project take?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">Most projects take 2–4 weeks from kickoff to final handoff. A simple landing page might be 10 days; a multi-page site with complex interactions can stretch to 6 weeks. We give you a clear timeline in our proposal before we start.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What if I don't have a brand identity yet?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">No problem. We can design within a minimal direction (mood boards, reference sites, color preferences). However, for best results, we recommend our <a href="softwaredevelopment.html" class="underline font-medium">Branding + Web Design</a> bundle. It ensures your site feels cohesive, not patched together.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Will my developer understand your Figma files?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">Absolutely. We organize layers, name components properly, and include spacing annotations. We also offer a 30-minute handoff call with your developer to walk through the file and answer questions. Most devs tell us our files are the cleanest they've received.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Can I request more than 2 revision rounds?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        </div>
+                    </div>
+                    <div class="faq-answer">
+                        <p class="text-black/60 leading-relaxed pt-4">Yes — additional revision rounds are billed at an hourly rate. But honestly, our discovery phase is thorough enough that 2 rounds usually gets us to "this is perfect." Major scope changes (new pages, new features) after approval are quoted separately.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter fade-up">Ready for a Site That Sells?</h2>
+            <p class="text-xl text-black/60 mb-12 fade-up">Let's design something your customers actually want to click through.</p>
+            <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] fade-up">
+                Start a Web Design Project
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">
+                        Africa's leading tech agency. Building digital products that matter.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="webdesign.html" class="hover:text-white transition-colors">Web Design</a></li>
+                        <li><a href="softwaredevelopment.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="appdev.html" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="seo.html" class="hover:text-white transition-colors">Branding</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="../services.html" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="../academy.html" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="../blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="../contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Project Modal -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+                
+                <h3 class="text-2xl font-black mb-2">Start a Web Design Project</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your site and we'll get back within 24 hours.</p>
+                
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Business Name</label>
+                        <input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">What type of website do you need?</label>
+                        <select name="websiteType" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white">
+                            <option>Landing Page</option>
+                            <option>Multi-page Business Site</option>
+                            <option>E-commerce Store</option>
+                            <option>Portfolio / Personal</option>
+                            <option>SaaS Dashboard</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Do you have a developer already?</label>
+                        <select name="hasDeveloper" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white">
+                            <option>Yes, I have a developer</option>
+                            <option>No, I need dev too</option>
+                            <option>Not sure yet</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Project Details</label>
+                        <textarea name="projectDetails" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="Number of pages, must-have features, design style preferences..."></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Company Email</label>
+                            <input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Phone Number</label>
+                            <input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234...">
+                        </div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2 flex items-center justify-center gap-2">
+    <span id="btnText">Submit Request</span>
+    <div id="btnSpinner" class="spinner hidden" style="width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;"></div>
+</button>
+                </form>
+            </div>
+            
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Looking forward to designing something great together.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Firebase Config — SWAP THESE WITH YOUR REAL VALUES
+const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+
+let db;
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log("Firebase connected");
+} catch (e) {
+    console.log("Firebase not configured yet — form will log to console");
+}
+        // Header Toggle
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            
+            if (window.innerWidth < 768) {
+                mobileNav.classList.toggle('hidden');
+                return;
+            }
+            
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) {
+                header.querySelector('.header-inner').classList.add('header-collapsed');
+                logo.classList.add('expanded');
+            } else {
+                header.querySelector('.header-inner').classList.remove('header-collapsed');
+                logo.classList.remove('expanded');
+            }
+        }
+
+        // FAQ Toggle
+        function toggleFaq(item) {
+            const allItems = document.querySelectorAll('.faq-item');
+            allItems.forEach(el => {
+                if (el !== item) el.classList.remove('open');
+            });
+            item.classList.toggle('open');
+        }
+
+        // Modal Logic
+        function openModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('projectModal');
+            const content = document.getElementById('modalContent');
+            const success = document.getElementById('successCard');
+            
+            content.classList.add('scale-95', 'opacity-0');
+            content.classList.remove('scale-100', 'opacity-100');
+            success.classList.add('scale-95', 'opacity-0', 'hidden');
+            success.classList.remove('scale-100', 'opacity-100');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                document.getElementById('projectForm').reset();
+            }, 300);
+        }
+
+        async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form));
+    data.timestamp = new Date().toISOString();
+    data.status = "new";
+
+    // Optional: button loading state
+    const btn = document.getElementById('submitBtn');
+const btnText = document.getElementById('btnText');
+const spinner = document.getElementById('btnSpinner');
+btn.disabled = true;
+btnText.textContent = 'Sending...';
+spinner.classList.remove('hidden');
+
+    try {
+        if (db) {
+            // CHANGE THIS COLLECTION NAME PER PAGE (see list below)
+            await db.collection('webDesignProjects').add(data);
+            console.log('Saved to Firebase:', data);
+        } else {
+            console.log('Firebase not ready, logged:', data);
+            await new Promise(r => setTimeout(r, 800)); // fake delay for demo
+        }
+
+        // Show success card
+        document.getElementById('modalContent').classList.add('hidden');
+        const success = document.getElementById('successCard');
+        success.classList.remove('hidden');
+        setTimeout(() => {
+            success.classList.remove('scale-95', 'opacity-0');
+            success.classList.add('scale-100', 'opacity-100');
+        }, 10);
+
+    } catch (error) {
+        console.error('Error saving:', error);
+        alert('Something went wrong. Please try again or email us directly.');
+        btn.disabled = false;
+btnText.textContent = 'Submit Request'; // or whatever your original text was
+spinner.classList.add('hidden');
+    }
+}
+
+        // GSAP Scroll Animations
+        gsap.registerPlugin(ScrollTrigger);
+        
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => {
+            gsap.fromTo(elem, 
+                { opacity: 0, y: 30 },
+                {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: 'top 85%',
+                        toggleActions: 'play none none none'
+                    },
+                    delay: i * 0.05
+                }
+            );
+        });
+
+        // Header scroll shadow
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('mainHeader');
+            if (window.pageYOffset > 100) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body>
+</html>

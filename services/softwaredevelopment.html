@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Software Development — Built to Last | Addro Tech</title>
+    <!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 60; background: white; padding: 0.75rem 2rem; border-radius: 9999px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .modal-overlay { backdrop-filter: blur(10px); background: rgba(0,0,0,0.3); }
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        
+        .code-block {
+            background: #0a0a0a;
+            border: 2px solid #000;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .code-header {
+            background: #1a1a1a;
+            padding: 12px 16px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            border-bottom: 1px solid #333;
+        }
+        .code-dot { width: 12px; height: 12px; border-radius: 50%; }
+        .code-content { padding: 20px; color: #e0e0e0; font-size: 13px; line-height: 1.7; overflow-x: auto; }
+        .code-keyword { color: #ff79c6; }
+        .code-string { color: #f1fa8c; }
+        .code-function { color: #8be9fd; }
+        .code-comment { color: #6272a4; }
+        
+        .tech-card {
+            border: 2px solid #000;
+            border-radius: 16px;
+            padding: 24px;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 3px 3px 0px #000;
+        }
+        .tech-card:hover { transform: translateY(-4px); box-shadow: 6px 8px 0px #000; }
+        
+        .process-step {
+            position: relative;
+            padding-left: 40px;
+        }
+        .process-step::before {
+            content: '';
+            position: absolute;
+            left: 12px;
+            top: 40px;
+            bottom: -20px;
+            width: 2px;
+            background: rgba(0,0,0,0.1);
+        }
+        .process-step:last-child::before { display: none; }
+        .step-number {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 28px;
+            height: 28px;
+            background: #000;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        
+        .faq-item { border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
+        .faq-icon { transition: transform 0.3s ease; }
+        .faq-item.open .faq-icon { transform: rotate(45deg); }
+        
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../index.html" class="hover:opacity-60 transition-opacity">Home</a>
+                    <a href="./services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                </nav>
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()"><h1 class="text-2xl font-black tracking-tighter">ADDRO</h1></div>
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../acdemy.html" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="../contact.html" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                <button class="md:hidden p-2" onclick="toggleHeader()"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+            </div>
+        </div>
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="../index.html" onclick="toggleHeader()">Home</a>
+                <a href="../services.html" onclick="toggleHeader()">Services</a>
+                <a href="../academy.html" onclick="toggleHeader()">Academy</a>
+                <a href="../contact.html" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-20 px-6 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-40"></div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-up">
+                    <p class="text-sm font-medium tracking-widest uppercase mb-6 text-black/50">Software Development</p>
+                    <h1 class="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.95]">
+                        Built to<br>
+                        Last.<br>
+                        Built to<br>
+                        Scale.
+                    </h1>
+                    <p class="text-xl text-black/60 mb-10 leading-relaxed">
+                        Web apps. Mobile apps. APIs. Cloud infrastructure. We write code that doesn't break when your user count goes from 100 to 100,000.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="openModal()" class="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)]">Start Building</button>
+                        <a href="#stack" class="border-2 border-black px-8 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all text-center">See Our Stack</a>
+                    </div>
+                </div>
+                
+                <!-- Code Window -->
+                <div class="fade-up">
+                    <div class="code-block shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="code-header">
+                            <div class="code-dot bg-red-500"></div>
+                            <div class="code-dot bg-yellow-500"></div>
+                            <div class="code-dot bg-green-500"></div>
+                            <span class="ml-2 text-xs text-gray-400 font-mono">addro-project.ts</span>
+                        </div>
+                        <div class="code-content font-mono">
+                            <div><span class="code-comment">// How Addro builds software</span></div>
+                            <div><span class="code-keyword">const</span> <span class="code-function">buildProduct</span> = <span class="code-keyword">async</span> () => {</div>
+                            <div class="pl-4"><span class="code-keyword">const</span> foundation = <span class="code-keyword">await</span> <span class="code-function">auditRequirements</span>();</div>
+                            <div class="pl-4"><span class="code-keyword">const</span> architecture = <span class="code-function">designSystem</span>({</div>
+                            <div class="pl-8">scalable: <span class="code-string">true</span>,</div>
+                            <div class="pl-8">secure: <span class="code-string">true</span>,</div>
+                            <div class="pl-8">documented: <span class="code-string">true</span></div>
+                            <div class="pl-4">});</div>
+                            <div class="pl-4"><span class="code-keyword">return</span> <span class="code-function">deploy</span>(architecture);</div>
+                            <div>}</div>
+                            <div class="mt-2"><span class="code-comment">// No shortcuts. No disappearances.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem -->
+    <section class="py-20 px-6 bg-neutral-50">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-black tracking-tighter mb-4 fade-up">The Broken Promise</h2>
+            <p class="text-black/60 mb-16 fade-up">Most agencies deliver code that becomes a liability. Here's how.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">💥</div>
+                    <h3 class="font-bold text-lg mb-2">The Spaghetti Code</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">No structure, no patterns, no documentation. When you need to add a feature, the whole thing falls apart. Your new developer quits after two weeks.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">🔓</div>
+                    <h3 class="font-bold text-lg mb-2">Security as an Afterthought</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">No input validation, exposed API keys, plaintext passwords. One breach and your reputation — and your users' data — is gone.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">👻</div>
+                    <h3 class="font-bold text-lg mb-2">The Ghosting</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">They launch and vanish. No maintenance, no bug fixes, no answers when something breaks at 2 AM. You're left holding broken code.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section id="stack" class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-4 fade-up">What We Build</h2>
+                <p class="text-black/60 fade-up">End-to-end software. From database to deployment.</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="tech-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center text-xl mb-4">🌐</div>
+                    <h3 class="font-bold text-lg mb-2">Web Applications</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Full-stack web apps with React, Next.js, Vue, or Angular. Server-rendered, fast, SEO-friendly, and built for scale.</p>
+                </div>
+                <div class="tech-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center text-xl mb-4">📱</div>
+                    <h3 class="font-bold text-lg mb-2">Mobile Applications</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Native iOS/Android with Swift and Kotlin, or cross-platform with React Native and Flutter. Smooth, responsive, app-store ready.</p>
+                </div>
+                <div class="tech-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center text-xl mb-4">🔌</div>
+                    <h3 class="font-bold text-lg mb-2">APIs & Backend Systems</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">RESTful and GraphQL APIs built with Node.js, Python, or Go. Clean architecture, rate limiting, and full authentication.</p>
+                </div>
+                <div class="tech-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center text-xl mb-4">☁️</div>
+                    <h3 class="font-bold text-lg mb-2">Cloud & DevOps</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">AWS, GCP, or Azure deployment. CI/CD pipelines, auto-scaling, containerization with Docker, and monitoring with real alerts.</p>
+                </div>
+                <div class="tech-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center text-xl mb-4">🗄️</div>
+                    <h3 class="font-bold text-lg mb-2">Database Architecture</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">PostgreSQL, MongoDB, Redis, or Firebase. Optimized schemas, indexing strategies, and backup systems that actually work.</p>
+                </div>
+                <div class="tech-card fade-up">
+                    <div class="w-12 h-12 bg-black text-white rounded-xl flex items-center justify-center text-xl mb-4">📋</div>
+                    <h3 class="font-bold text-lg mb-2">Documentation & Handoff</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">API docs, architecture diagrams, setup guides, and a deployment runbook. Your internal team can take over without calling us.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process -->
+    <section class="py-24 px-6 bg-neutral-50">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-16 fade-up">How We Ship</h2>
+            <div class="space-y-10">
+                <div class="process-step fade-up">
+                    <div class="step-number">1</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <h3 class="text-xl font-bold mb-2">Discovery & Scoping</h3>
+                        <p class="text-black/60 leading-relaxed">We map your requirements, user flows, and technical constraints. No code is written until we both agree on exactly what we're building and why.</p>
+                    </div>
+                </div>
+                <div class="process-step fade-up">
+                    <div class="step-number">2</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <h3 class="text-xl font-bold mb-2">Architecture & Planning</h3>
+                        <p class="text-black/60 leading-relaxed">Database schema, API contracts, tech stack selection, and infrastructure planning. We design the skeleton before adding muscle.</p>
+                    </div>
+                </div>
+                <div class="process-step fade-up">
+                    <div class="step-number">3</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <h3 class="text-xl font-bold mb-2">Sprint-Based Development</h3>
+                        <p class="text-black/60 leading-relaxed">Two-week sprints with demos at the end of each. You see progress constantly, not just at the finish line. Transparent, iterative, collaborative.</p>
+                    </div>
+                </div>
+                <div class="process-step fade-up">
+                    <div class="step-number">4</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <h3 class="text-xl font-bold mb-2">Testing & QA</h3>
+                        <p class="text-black/60 leading-relaxed">Unit tests, integration tests, security audits, and real-device testing. We break it before your users do.</p>
+                    </div>
+                </div>
+                                <div class="process-step fade-up">
+                    <div class="step-number">5</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <h3 class="text-xl font-bold mb-2">Deploy & Support</h3>
+                        <p class="text-black/60 leading-relaxed">Production deployment, monitoring setup, and a 30-day support window. After that, we offer maintenance retainers — because we don't disappear after launch.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">Shipped & Stable</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Real products. Real load. Zero downtime drama.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="bg-neutral-100 p-6 border-b-2 border-black">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-black text-white text-xs font-bold px-3 py-1 rounded-full">FINTECH</span>
+                            <span class="text-sm font-bold">99.9% Uptime</span>
+                        </div>
+                        <h3 class="text-2xl font-black tracking-tighter">Cross-Border Payment API</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Built a real-time payment processing API handling 10K+ daily transactions across 5 African countries. Node.js backend, PostgreSQL database, Redis caching, and AWS auto-scaling.</p>
+                        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">10K+</p>
+                                <p class="text-xs text-black/50">Daily TXNs</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">&lt;200ms</p>
+                                <p class="text-xs text-black/50">Response</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">5</p>
+                                <p class="text-xs text-black/50">Countries</p>
+                            </div>
+                        </div>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">Read Technical Case Study →</a>
+                    </div>
+                </div>
+                
+                <div class="border-2 border-black rounded-2xl overflow-hidden fade-up">
+                    <div class="bg-neutral-100 p-6 border-b-2 border-black">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-black text-white text-xs font-bold px-3 py-1 rounded-full">HEALTHCARE</span>
+                            <span class="text-sm font-bold">HIPAA-Aligned</span>
+                        </div>
+                        <h3 class="text-2xl font-black tracking-tighter">Telehealth Platform</h3>
+                    </div>
+                    <div class="p-6">
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Full-stack telehealth app with video consultations, appointment booking, and encrypted medical records. React Native mobile app + Next.js web dashboard.</p>
+                        <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">50K+</p>
+                                <p class="text-xs text-black/50">Downloads</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">4.8★</p>
+                                <p class="text-xs text-black/50">App Store</p>
+                            </div>
+                            <div class="bg-neutral-50 rounded-lg p-3">
+                                <p class="text-xl font-black">2</p>
+                                <p class="text-xs text-black/50">Platforms</p>
+                            </div>
+                        </div>
+                        <a href="#" class="inline-flex items-center gap-2 text-sm font-bold border-b-2 border-black pb-1 hover:gap-4 transition-all">Read Technical Case Study →</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-20 px-6 bg-black text-white">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">Investment</h2>
+            <p class="text-center text-white/60 mb-12 fade-up">Fixed scope. Fixed price. No scope-creep surprises.</p>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">MVP Sprint</h3>
+                    <p class="text-4xl font-black mb-4">$4,500</p>
+                    <p class="text-sm text-white/60 mb-6">Launch fast, validate faster. 4–6 week build.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Single core feature</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Web or mobile (one)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Basic auth + database</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Deployment + docs</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Start MVP</button>
+                </div>
+                
+                <div class="bg-white text-black rounded-2xl p-8 relative fade-up">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
+                    <h3 class="text-sm uppercase tracking-widest text-black/50 mb-2">Full Product</h3>
+                    <p class="text-4xl font-black mb-4">$12,000</p>
+                    <p class="text-sm text-black/60 mb-6">The complete build. 8–12 weeks.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Multi-feature platform</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Web + mobile apps</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>API + admin dashboard</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Payment integration</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Testing + 30-day support</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full bg-black text-white py-3 rounded-full font-bold hover:scale-105 transition-transform">Start Building</button>
+                </div>
+                
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Enterprise</h3>
+                    <p class="text-4xl font-black mb-4">Custom</p>
+                    <p class="text-sm text-white/60 mb-6">Complex systems. Dedicated team.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Microservices architecture</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Multiple integrations</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Dedicated dev team</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Ongoing maintenance</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Talk to Us</button>
+                </div>
+            </div>
+            <p class="text-center text-white/40 text-sm mt-8 fade-up">All projects include source code ownership, documentation, and deployment assistance.</p>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Dev Questions</h2>
+            <div class="space-y-0">
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What tech stack do you use?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Frontend: React, Next.js, Vue, or Angular. Backend: Node.js, Python (Django/FastAPI), or Go. Mobile: React Native or Flutter. Cloud: AWS, GCP, or Azure. We pick the stack based on your project needs — not our comfort zone.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Do I own the source code?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">100%. Once final payment is made, the entire codebase, documentation, and deployment configs are yours. We don't lock you in. We don't use proprietary frameworks. Standard, well-documented code that any competent developer can pick up.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">How do you handle changes mid-project?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Small tweaks within scope? No problem. Major feature additions or pivots get quoted separately before implementation. We communicate immediately if a request affects timeline or budget — no surprise invoices at the end.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What happens after launch?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Every project includes 30 days of post-launch support for bug fixes and minor adjustments. After that, we offer monthly maintenance retainers (starting at $500/mo) for updates, monitoring, and feature additions. We stay — that's the Addro difference.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Can you work with our existing codebase?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Yes, but we do a code audit first (billed separately at $300). If the codebase is salvageable, we'll build on it. If it's spaghetti, we'll be honest and recommend a rebuild. No point pouring new wine into cracked bottles.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter fade-up">Build Something<br>That Lasts.</h2>
+            <p class="text-xl text-black/60 mb-12 fade-up">No spaghetti. No ghosts. Just clean code and a team that stays.</p>
+            <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] fade-up">Start a Dev Project</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">Africa's leading tech agency. Building digital products that matter.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="webdesign.html" class="hover:text-white transition-colors">Web Design</a></li>
+                        <li><a href="softwaredevelopment.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="appdev.html" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="seo.html" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="../services.html" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="../academy.html" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="../blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="../contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <h3 class="text-2xl font-black mb-2">Start a Dev Project</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us what you're building and we'll scope it within 24 hours.</p>
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-1">Business Name</label><input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name"></div>
+                    <div><label class="block text-sm font-medium mb-1">What are you building?</label><select name="projectType" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>Web Application</option><option>Mobile App</option><option>API / Backend</option><option>E-commerce Platform</option><option>Not sure yet</option></select></div>
+                    <div><label class="block text-sm font-medium mb-1">Do you have designs ready?</label><select name="hasDesigns" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>Yes, designs are ready</option><option>No, need design too</option><option>Partial / Wireframes only</option></select></div>
+                    <div><label class="block text-sm font-medium mb-1">Project Description</label><textarea name="projectDesc" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="Core features, user types, integrations needed..."></textarea></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium mb-1">Company Email</label><input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com"></div>
+                        <div><label class="block text-sm font-medium mb-1">Phone Number</label><input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234..."></div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2 flex items-center justify-center gap-2">
+    <span id="btnText">Submit Request</span>
+    <div id="btnSpinner" class="spinner hidden" style="width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-radius:50%;border-top-color:white;animation:spin 0.8s linear infinite;"></div>
+</button>
+                </form>
+            </div>
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Ready to build something solid.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        // Firebase Config — SWAP THESE WITH YOUR REAL VALUES
+const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+
+let db;
+try {
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    console.log("Firebase connected");
+} catch (e) {
+    console.log("Firebase not configured yet — form will log to console");
+}
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            if (window.innerWidth < 768) { mobileNav.classList.toggle('hidden'); return; }
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) { header.querySelector('.header-inner').classList.add('header-collapsed'); logo.classList.add('expanded'); }
+            else { header.querySelector('.header-inner').classList.remove('header-collapsed'); logo.classList.remove('expanded'); }
+        }
+        function toggleFaq(item) { document.querySelectorAll('.faq-item').forEach(el => { if (el !== item) el.classList.remove('open'); }); item.classList.toggle('open'); }
+        function openModal() { const modal = document.getElementById('projectModal'); const content = document.getElementById('modalContent'); modal.classList.remove('hidden'); setTimeout(() => { content.classList.remove('scale-95','opacity-0'); content.classList.add('scale-100','opacity-100'); }, 10); }
+        function closeModal() { const modal = document.getElementById('projectModal'); const content = document.getElementById('modalContent'); const success = document.getElementById('successCard'); content.classList.add('scale-95','opacity-0'); content.classList.remove('scale-100','opacity-100'); success.classList.add('scale-95','opacity-0','hidden'); success.classList.remove('scale-100','opacity-100'); setTimeout(() => { modal.classList.add('hidden'); document.getElementById('projectForm').reset(); }, 300); }
+        async function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const data = Object.fromEntries(new FormData(form));
+    data.timestamp = new Date().toISOString();
+    data.status = "new";
+
+    // Optional: button loading state
+   const btn = document.getElementById('submitBtn');
+const btnText = document.getElementById('btnText');
+const spinner = document.getElementById('btnSpinner');
+btn.disabled = true;
+btnText.textContent = 'Sending...';
+spinner.classList.remove('hidden');
+
+    try {
+        if (db) {
+            // CHANGE THIS COLLECTION NAME PER PAGE (see list below)
+            await db.collection('webDevelopmentProjects').add(data);
+            console.log('Saved to Firebase:', data);
+        } else {
+            console.log('Firebase not ready, logged:', data);
+            await new Promise(r => setTimeout(r, 800)); // fake delay for demo
+        }
+
+        // Show success card
+        document.getElementById('modalContent').classList.add('hidden');
+        const success = document.getElementById('successCard');
+        success.classList.remove('hidden');
+        setTimeout(() => {
+            success.classList.remove('scale-95', 'opacity-0');
+            success.classList.add('scale-100', 'opacity-100');
+        }, 10);
+
+    } catch (error) {
+        console.error('Error saving:', error);
+        alert('Something went wrong. Please try again or email us directly.');
+       btn.disabled = false;
+btnText.textContent = 'Submit Request'; // or whatever your original text was
+spinner.classList.add('hidden');
+    }
+}
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => { gsap.fromTo(elem, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: elem, start: 'top 85%', toggleActions: 'play none none none' }, delay: i * 0.05 }); });
+        window.addEventListener('scroll', () => { const header = document.getElementById('mainHeader'); if (window.pageYOffset > 100) header.classList.add('shadow-sm'); else header.classList.remove('shadow-sm'); });
+    </script>
+</body>
+</html>

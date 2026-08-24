@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video & Photo Editing — Content That Hits | Addro Tech</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .grid-bg {
+            background-size: 60px 60px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.04) 1px, transparent 1px);
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove { 0% { background-position: 0 0; } 100% { background-position: 60px 60px; } }
+        .header-full { transform: translateY(0); opacity: 1; }
+        .header-collapsed { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        .logo-btn { transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
+        .logo-btn.expanded { position: fixed; top: 1rem; left: 50%; transform: translateX(-50%); z-index: 60; background: white; padding: 0.75rem 2rem; border-radius: 9999px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+        .modal-overlay { backdrop-filter: blur(10px); background: rgba(0,0,0,0.3); }
+        .fade-up { opacity: 0; transform: translateY(30px); }
+        
+        /* Film strip effect */
+        .film-strip {
+            background-image: repeating-linear-gradient(90deg, transparent, transparent 18px, #000 18px, #000 24px);
+            height: 30px;
+            width: 100%;
+        }
+        
+        /* Timeline visual */
+        .timeline-track {
+            position: relative;
+            height: 40px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #000;
+        }
+        .timeline-clip {
+            position: absolute;
+            height: 100%;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .timeline-clip:hover { transform: scaleY(1.2); z-index: 10; }
+        
+        .service-card {
+            border: 2px solid #000;
+            border-radius: 20px;
+            overflow: hidden;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 0px #000;
+        }
+        .service-card:hover { transform: translateY(-6px); box-shadow: 8px 10px 0px #000; }
+        
+        .faq-item { border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; }
+        .faq-item.open .faq-answer { max-height: 300px; padding-bottom: 20px; }
+        .faq-icon { transition: transform 0.3s ease; }
+        .faq-item.open .faq-icon { transform: rotate(45deg); }
+        
+        /* Loading spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        html { scroll-behavior: smooth; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #000; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-white text-black overflow-x-hidden">
+
+    <!-- Header -->
+    <header id="mainHeader" class="fixed top-0 left-0 w-full z-50 transition-all duration-700">
+        <div class="header-inner bg-white/80 backdrop-blur-md border-b border-black/5">
+            <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../index.html" class="hover:opacity-60 transition-opacity">Home</a>
+                    <a href="../services.html" class="hover:opacity-60 transition-opacity">Services</a>
+                </nav>
+                <div id="logoContainer" class="logo-btn cursor-pointer" onclick="toggleHeader()"><h1 class="text-2xl font-black tracking-tighter">ADDRO</h1></div>
+                <nav class="hidden md:flex items-center gap-8 text-sm font-medium">
+                    <a href="../academy.html" class="hover:opacity-60 transition-opacity">Academy</a>
+                    <a href="../contact.html" class="hover:opacity-60 transition-opacity">Contact</a>
+                </nav>
+                <button class="md:hidden p-2" onclick="toggleHeader()"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+            </div>
+        </div>
+        <div id="mobileNav" class="hidden md:hidden bg-white border-b border-black/10">
+            <div class="px-6 py-4 flex flex-col gap-4 text-sm font-medium">
+                <a href="../index.html" onclick="toggleHeader()">Home</a>
+                <a href="../services.html" onclick="toggleHeader()">Services</a>
+                <a href="../academy.html" onclick="toggleHeader()">Academy</a>
+                <a href="../contact.html" onclick="toggleHeader()">Contact</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="pt-32 pb-20 px-6 bg-white relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-40"></div>
+        <div class="max-w-6xl mx-auto relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="fade-up">
+                    <p class="text-sm font-medium tracking-widest uppercase mb-6 text-black/50">Video & Photo Editing</p>
+                    <h1 class="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.95]">
+                        Content That<br>
+                        Stops the<br>
+                        Scroll.
+                    </h1>
+                    <p class="text-xl text-black/60 mb-10 leading-relaxed">
+                        Raw footage is just potential. We cut, color, and craft it into content that demands attention — and keeps it. From TikToks to TV spots.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="openModal()" class="bg-black text-white px-8 py-4 rounded-full font-bold hover:scale-105 transition-transform shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)]">Edit My Content</button>
+                        <a href="#work" class="border-2 border-black px-8 py-4 rounded-full font-bold hover:bg-black hover:text-white transition-all text-center">See the Work</a>
+                    </div>
+                </div>
+                
+                <!-- Mock Video Editor -->
+                <div class="fade-up">
+                    <div class="bg-neutral-900 rounded-2xl overflow-hidden border-2 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="bg-neutral-800 px-4 py-2 flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="ml-2 text-xs text-gray-400">Addro Edit Suite — Project_01.aep</span>
+                        </div>
+                        <div class="aspect-video bg-black relative overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=700&h=400&fit=crop" class="w-full h-full object-cover opacity-80" alt="Video editing">
+                            <div class="absolute bottom-4 left-4 right-4">
+                                <div class="bg-white/10 backdrop-blur rounded-lg p-2">
+                                    <div class="flex gap-1 mb-2">
+                                        <div class="h-8 flex-1 bg-red-500/80 rounded"></div>
+                                        <div class="h-8 flex-1 bg-blue-500/80 rounded"></div>
+                                        <div class="h-8 flex-1 bg-green-500/80 rounded"></div>
+                                        <div class="h-8 flex-1 bg-yellow-500/80 rounded"></div>
+                                    </div>
+                                    <div class="h-1 bg-white/30 rounded-full overflow-hidden">
+                                        <div class="h-full w-2/3 bg-white rounded-full"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-3 bg-neutral-800 flex gap-2 overflow-x-auto">
+                            <div class="w-16 h-10 bg-neutral-700 rounded border border-white/20 flex-shrink-0"></div>
+                            <div class="w-16 h-10 bg-neutral-700 rounded border border-white/20 flex-shrink-0"></div>
+                            <div class="w-16 h-10 bg-neutral-700 rounded border-2 border-white flex-shrink-0"></div>
+                            <div class="w-16 h-10 bg-neutral-700 rounded border border-white/20 flex-shrink-0"></div>
+                            <div class="w-16 h-10 bg-neutral-700 rounded border border-white/20 flex-shrink-0"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Problem -->
+    <section class="py-20 px-6 bg-neutral-50">
+        <div class="max-w-5xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-black tracking-tighter mb-4 fade-up">Bad Editing Kills Good Content</h2>
+            <p class="text-black/60 mb-16 fade-up">You shot it. Now don't ruin it in post.</p>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">😴</div>
+                    <h3 class="font-bold text-lg mb-2">The Bore-athon</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">3-minute intro before anything happens. No pacing, no energy, no reason to keep watching. Viewer exits at 0:08.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">🌈</div>
+                    <h3 class="font-bold text-lg mb-2">Color Chaos</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Inconsistent grading across clips. Skin tones look radioactive. The "cinematic LUT" made everything look like a muddy puddle.</p>
+                </div>
+                <div class="bg-white border-2 border-black rounded-2xl p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] fade-up">
+                    <div class="text-5xl mb-4">🔇</div>
+                    <h3 class="font-bold text-lg mb-2">Audio Neglect</h3>
+                    <p class="text-sm text-black/60 leading-relaxed">Music drowns the voiceover. No sound design. Echoey dialogue. Bad audio makes viewers leave faster than bad video.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black tracking-tighter mb-4 fade-up">The Edit Suite</h2>
+                <p class="text-black/60 fade-up">Everything your content needs to look and sound professional.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
+                <div class="fade-up">
+                    <h3 class="text-2xl font-black mb-6 flex items-center gap-3">
+                        <span class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center text-lg">🎬</span>
+                        Video Editing
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Rough Cut to Final Cut</h4>
+                                <p class="text-sm text-black/60">Story-driven editing with tight pacing. Every frame earns its place.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Color Grading & Correction</h4>
+                                <p class="text-sm text-black/60">Consistent look across all footage. Cinematic or clean — your call.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Motion Graphics & Titles</h4>
+                                <p class="text-sm text-black/60">Animated lower thirds, intros, transitions, and kinetic typography.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Sound Design & Mixing</h4>
+                                <p class="text-sm text-black/60">Clean dialogue, layered SFX, music that fits — not fights.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fade-up">
+                    <h3 class="text-2xl font-black mb-6 flex items-center gap-3">
+                        <span class="w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center text-lg">📸</span>
+                        Photo Editing
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Retouching & Cleanup</h4>
+                                <p class="text-sm text-black/60">Skin smoothing, blemish removal, background cleanup — natural, not plastic.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Color Grading</h4>
+                                <p class="text-sm text-black/60">Mood-matched tones. Warm and inviting, or cold and editorial.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Compositing & Manipulation</h4>
+                                <p class="text-sm text-black/60">Background swaps, object removal, multi-image composites.</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-4 p-4 border-2 border-black rounded-xl hover:bg-neutral-50 transition-colors">
+                            <div class="w-2 h-2 bg-black rounded-full mt-2 flex-shrink-0"></div>
+                            <div>
+                                <h4 class="font-bold">Batch Processing</h4>
+                                <p class="text-sm text-black/60">100+ product photos? We automate consistent edits across the full set.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Output Formats -->
+            <div class="bg-black text-white rounded-3xl p-8 md:p-12 fade-up">
+                <h3 class="text-2xl font-black mb-8 text-center">Delivered In Every Format You Need</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+                    <div class="border border-white/20 rounded-xl p-4">
+                        <p class="text-2xl font-black mb-1">4K</p>
+                        <p class="text-xs text-white/60">Ultra HD Export</p>
+                    </div>
+                    <div class="border border-white/20 rounded-xl p-4">
+                        <p class="text-2xl font-black mb-1">9:16</p>
+                        <p class="text-xs text-white/60">Reels / TikTok</p>
+                    </div>
+                    <div class="border border-white/20 rounded-xl p-4">
+                        <p class="text-2xl font-black mb-1">1:1</p>
+                        <p class="text-xs text-white/60">Instagram Feed</p>
+                    </div>
+                    <div class="border border-white/20 rounded-xl p-4">
+                        <p class="text-2xl font-black mb-1">16:9</p>
+                        <p class="text-xs text-white/60">YouTube / Web</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Process -->
+    <section class="py-24 px-6 bg-neutral-50">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-16 fade-up">From Raw to Ready</h2>
+            <div class="space-y-8">
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">01</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">01</div>
+                        <h3 class="text-xl font-bold mb-2">Ingest & Organize</h3>
+                        <p class="text-black/60 leading-relaxed">We receive your footage/photos, back them up, and organize by scene, take, or product category. Nothing gets lost. Everything gets labeled.</p>
+                    </div>
+                </div>
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">02</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">02</div>
+                        <h3 class="text-xl font-bold mb-2">Assembly & Rough Cut</h3>
+                        <p class="text-black/60 leading-relaxed">We build the narrative structure. Best takes, logical flow, pacing that matches the energy you're going for. You get a first look within 48 hours.</p>
+                    </div>
+                </div>
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">03</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">03</div>
+                        <h3 class="text-xl font-bold mb-2">Color, Sound & Graphics</h3>
+                        <p class="text-black/60 leading-relaxed">Grading that matches your brand. Audio cleaned and mixed. Titles, lower thirds, and motion graphics layered in. The polish phase.</p>
+                    </div>
+                </div>
+                <div class="flex gap-6 fade-up">
+                    <div class="hidden md:flex w-14 h-14 bg-black text-white rounded-2xl items-center justify-center font-black text-xl flex-shrink-0">04</div>
+                    <div class="bg-white border-2 border-black rounded-2xl p-6 md:p-8 flex-1 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div class="md:hidden w-10 h-10 bg-black text-white rounded-lg flex items-center justify-center font-bold mb-4">04</div>
+                        <h3 class="text-xl font-bold mb-2">Review & Deliver</h3>
+                        <p class="text-black/60 leading-relaxed">You review, we revise. Final exports in all requested formats — ready to upload, print, or present. Source project files included on request.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proof -->
+    <section id="work" class="py-24 px-6 bg-white">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-4 fade-up">The Before & After</h2>
+            <p class="text-center text-black/60 mb-16 fade-up">Real footage. Real transformation. Real results.</p>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="service-card fade-up">
+                    <div class="h-56 bg-neutral-100 border-b-2 border-black overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?w=600&h=350&fit=crop" class="w-full h-full object-cover" alt="Event video">
+                        <div class="absolute top-4 right-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">VIDEO</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">AfroTech Conference Recap</h3>
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Turned 6 hours of raw event footage into a 90-second hype reel. Color-graded for energy, sound-designed with crowd reactions and music drops. Result: 500K+ views, 2K+ shares.</p>
+                        <div class="flex gap-4 text-sm">
+                            <span class="font-bold">90s final</span>
+                            <span class="text-black/30">|</span>
+                            <span class="font-bold">6hrs raw</span>
+                            <span class="text-black/30">|</span>
+                            <span class="font-bold">500K+ views</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="service-card fade-up">
+                    <div class="h-56 bg-neutral-100 border-b-2 border-black overflow-hidden relative">
+                        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=600&h=350&fit=crop" class="w-full h-full object-cover" alt="Product photos">
+                        <div class="absolute top-4 right-4 bg-black text-white text-xs font-bold px-3 py-1 rounded-full">PHOTO</div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">LuxeSkin Product Line</h3>
+                        <p class="text-sm text-black/60 mb-4 leading-relaxed">Retouched and color-graded 120 product photos for an e-commerce launch. Consistent skin tones, clean backgrounds, batch-matched lighting. Result: 35% increase in add-to-cart rate.</p>
+                        <div class="flex gap-4 text-sm">
+                            <span class="font-bold">120 photos</span>
+                            <span class="text-black/30">|</span>
+                            <span class="font-bold">3-day turnaround</span>
+                            <span class="text-black/30">|</span>
+                            <span class="font-bold">+35% conversion</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="py-20 px-6 bg-black text-white">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">Pick Your Edit</h2>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Single Project</h3>
+                    <p class="text-4xl font-black mb-4">$300</p>
+                    <p class="text-sm text-white/60 mb-6">One video or up to 20 photos. Perfect for a quick, professional polish.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Up to 5 min video OR 20 photos</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Color correction</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Basic sound mix</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>2 revision rounds</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>3-day delivery</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Book This</button>
+                </div>
+                
+                <div class="bg-white text-black rounded-2xl p-8 relative fade-up">
+                    <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-bold px-4 py-1 rounded-full">MOST POPULAR</div>
+                    <h3 class="text-sm uppercase tracking-widest text-black/50 mb-2">Content Creator Pack</h3>
+                    <p class="text-4xl font-black mb-4">$900<span class="text-lg font-normal text-black/50">/mo</span></p>
+                    <p class="text-sm text-black/60 mb-6">Monthly retainer for creators and brands with regular content needs.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>4 videos (up to 10 min each)</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>OR 80 photos/month</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Motion graphics included</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Multi-format exports</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>3 revision rounds</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>48-hour turnaround</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full bg-black text-white py-3 rounded-full font-bold hover:scale-105 transition-transform">Subscribe</button>
+                </div>
+                
+                <div class="border border-white/20 rounded-2xl p-8 fade-up">
+                    <h3 class="text-sm uppercase tracking-widest text-white/50 mb-2">Commercial Grade</h3>
+                    <p class="text-4xl font-black mb-4">Custom</p>
+                    <p class="text-sm text-white/60 mb-6">Ads, documentaries, full campaigns. We become your post-production team.</p>
+                    <ul class="space-y-3 text-sm mb-8">
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Unlimited duration</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Advanced VFX & compositing</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Original sound design</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Dedicated editor</li>
+                        <li class="flex gap-2"><svg class="w-4 h-4 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Rush delivery available</li>
+                    </ul>
+                    <button onclick="openModal()" class="w-full border-2 border-white py-3 rounded-full font-bold hover:bg-white hover:text-black transition-all">Talk to Us</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="py-24 px-6 bg-white">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-4xl md:text-5xl font-black text-center tracking-tighter mb-12 fade-up">FAQs</h2>
+            <div class="space-y-0">
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What software do you edit in?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Adobe Premiere Pro and DaVinci Resolve for video. Photoshop, Lightroom, and Capture One for photos. After Effects for motion graphics. We export in whatever format your platform needs — H.264, ProRes, RAW, you name it.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">How do I send you my footage?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Google Drive, Dropbox, WeTransfer, or Frame.io — whatever works for you. For large projects, we'll set up a shared cloud workspace. We also accept hard drives if you're local to Lagos.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Can you match a style I like?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Absolutely. Send us reference videos, mood boards, or links to edits you love. We'll match the pacing, color grade, and energy — or create something original if you want to stand out from the references.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">What if I need revisions after delivery?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Your package includes 2–3 revision rounds depending on tier. Additional revisions are billed at $50/hour. We recommend consolidating feedback into one list per round to keep things efficient.</p></div>
+                </div>
+                <div class="faq-item py-6 cursor-pointer fade-up" onclick="toggleFaq(this)">
+                    <div class="flex justify-between items-center gap-4">
+                        <h3 class="text-lg font-bold">Do you provide raw project files?</h3>
+                        <div class="faq-icon w-8 h-8 rounded-full bg-black/5 flex items-center justify-center flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg></div>
+                    </div>
+                    <div class="faq-answer"><p class="text-black/60 leading-relaxed pt-4">Yes, on request and for an additional fee (usually 20% of project cost). This includes Premiere timelines, After Effects projects, or layered PSD files. Most clients just need the final exports, but we don't gatekeep your work.</p></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="py-32 px-6 bg-neutral-50 relative overflow-hidden">
+        <div class="absolute inset-0 grid-bg opacity-50"></div>
+        <div class="max-w-4xl mx-auto text-center relative z-10">
+            <h2 class="text-5xl md:text-7xl font-black mb-6 tracking-tighter fade-up">Let's Make Your<br>Content Unskippable.</h2>
+            <p class="text-xl text-black/60 mb-12 fade-up">Raw footage is just the beginning. The magic happens in the edit.</p>
+            <button onclick="openModal()" class="bg-black text-white px-10 py-5 rounded-full text-lg font-bold hover:scale-105 transition-transform shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] fade-up">Start an Edit Project</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-black text-white py-16 px-6">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-5 gap-12 mb-12">
+                <div class="md:col-span-2">
+                    <h3 class="text-3xl font-black tracking-tighter mb-4">ADDRO</h3>
+                    <p class="text-white/60 text-sm leading-relaxed max-w-xs">Africa's leading tech agency. Building digital products that matter.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Services</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="webdesign.html" class="hover:text-white transition-colors">Web Design</a></li>
+                        <li><a href="softwaredevelopment.html" class="hover:text-white transition-colors">Web Development</a></li>
+                        <li><a href="appdev.html" class="hover:text-white transition-colors">Mobile Apps</a></li>
+                        <li><a href="seo.html" class="hover:text-white transition-colors">SEO & Marketing</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Company</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="../services.html" class="hover:text-white transition-colors">Work</a></li>
+                        <li><a href="../academy.html" class="hover:text-white transition-colors">Academy</a></li>
+                        <li><a href="../blog.html" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="../contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4 text-sm uppercase tracking-wider">Connect</h4>
+                    <ul class="space-y-2 text-white/60 text-sm">
+                        <li><a href="#" class="hover:text-white transition-colors">Twitter / X</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Instagram</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Email Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-white/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/40 text-sm">© 2026 Addro Tech Agency. All rights reserved.</p>
+                <p class="text-white/40 text-sm">Made with passion in Africa 🌍</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="projectModal" class="fixed inset-0 z-[100] hidden">
+        <div class="modal-overlay absolute inset-0" onclick="closeModal()"></div>
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl transform scale-95 opacity-0 transition-all duration-300" id="modalContent">
+                <button onclick="closeModal()" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/5 flex items-center justify-center hover:bg-black/10 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <h3 class="text-2xl font-black mb-2">Start an Edit Project</h3>
+                <p class="text-black/60 text-sm mb-6">Tell us about your content and we'll get back within 24 hours.</p>
+                <form id="projectForm" onsubmit="handleSubmit(event)" class="space-y-4">
+                    <div><label class="block text-sm font-medium mb-1">Business Name</label><input type="text" name="businessName" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="Your company name"></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium mb-1">Service Type</label><select name="serviceType" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>Video Editing</option><option>Photo Editing</option><option>Both</option></select></div>
+                        <div><label class="block text-sm font-medium mb-1">Content Type</label><select name="contentType" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors bg-white"><option>Social Media</option><option>Commercial / Ad</option><option>Event Coverage</option><option>Product / E-commerce</option><option>Documentary</option><option>Other</option></select></div>
+                    </div>
+                    <div><label class="block text-sm font-medium mb-1">Project Details</label><textarea name="projectDetails" required rows="3" class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors resize-none" placeholder="Describe your project, duration, style preferences, deadline..."></textarea></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium mb-1">Company Email</label><input type="email" name="email" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="you@company.com"></div>
+                        <div><label class="block text-sm font-medium mb-1">Phone Number</label><input type="tel" name="phone" required class="w-full px-4 py-3 rounded-xl border-2 border-black/10 focus:border-black focus:outline-none transition-colors" placeholder="+234..."></div>
+                    </div>
+                    <button type="submit" id="submitBtn" class="w-full bg-black text-white py-4 rounded-xl font-bold hover:scale-[1.02] transition-transform mt-2 flex items-center justify-center gap-2">
+                        <span id="btnText">Submit Edit Request</span>
+                        <div id="btnSpinner" class="spinner hidden"></div>
+                    </button>
+                </form>
+            </div>
+            
+            <div id="successCard" class="bg-white rounded-3xl max-w-sm w-full p-8 text-center shadow-2xl hidden transform scale-95 opacity-0 transition-all duration-300">
+                <div class="w-16 h-16 bg-black rounded-full flex items-center justify-center mx-auto mb-4"><svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
+                <h3 class="text-2xl font-black mb-2">Thank You!</h3>
+                <p class="text-black/60">We would contact you as soon as possible. Ready to make your content pop.</p>
+                <button onclick="closeModal()" class="mt-6 bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:scale-105 transition-transform">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Config — SWAP THESE WITH YOUR REAL VALUES
+        const firebaseConfig = {
+  apiKey: "AIzaSyAkn3DV70xH3iWLFCmdkBgByED8lzq_2NA",
+  authDomain: "addro-7b1b4.firebaseapp.com",
+  projectId: "addro-7b1b4",
+  storageBucket: "addro-7b1b4.firebasestorage.app",
+  messagingSenderId: "578631006560",
+  appId: "1:578631006560:web:484e4c9643b4494be5c605",
+  measurementId: "G-YZJW7T79KD"
+};
+
+        // Initialize Firebase
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("Firebase connected");
+        } catch (e) {
+            console.log("Firebase not configured yet — form will log to console instead");
+        }
+
+        let headerCollapsed = false;
+        function toggleHeader() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoContainer');
+            const mobileNav = document.getElementById('mobileNav');
+            if (window.innerWidth < 768) { mobileNav.classList.toggle('hidden'); return; }
+            headerCollapsed = !headerCollapsed;
+            if (headerCollapsed) { header.querySelector('.header-inner').classList.add('header-collapsed'); logo.classList.add('expanded'); }
+            else { header.querySelector('.header-inner').classList.remove('header-collapsed'); logo.classList.remove('expanded'); }
+        }
+
+        function toggleFaq(item) { document.querySelectorAll('.faq-item').forEach(el => { if (el !== item) el.classList.remove('open'); }); item.classList.toggle('open'); }
+
+        function openModal() { const modal = document.getElementById('projectModal'); const content = document.getElementById('modalContent'); modal.classList.remove('hidden'); setTimeout(() => { content.classList.remove('scale-95','opacity-0'); content.classList.add('scale-100','opacity-100'); }, 10); }
+
+        function closeModal() { 
+            const modal = document.getElementById('projectModal'); 
+            const content = document.getElementById('modalContent'); 
+            const success = document.getElementById('successCard'); 
+            content.classList.add('scale-95','opacity-0'); 
+            content.classList.remove('scale-100','opacity-100'); 
+            success.classList.add('scale-95','opacity-0','hidden'); 
+            success.classList.remove('scale-100','opacity-100'); 
+            setTimeout(() => { 
+                modal.classList.add('hidden'); 
+                document.getElementById('projectForm').reset();
+                // Reset button state
+                document.getElementById('btnText').textContent = 'Submit Edit Request';
+                document.getElementById('btnSpinner').classList.add('hidden');
+                document.getElementById('submitBtn').disabled = false;
+            }, 300); 
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            data.timestamp = new Date().toISOString();
+            data.status = "new";
+
+            const btn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const spinner = document.getElementById('btnSpinner');
+
+            // Show loading
+            btn.disabled = true;
+            btnText.textContent = 'Sending...';
+            spinner.classList.remove('hidden');
+
+            try {
+                if (db) {
+                    // Save to Firebase
+                    await db.collection('editProjects').add(data);
+                    console.log('Saved to Firebase:', data);
+                } else {
+                    // Fallback: just log
+                    console.log('Form data (Firebase not configured):', data);
+                    // Simulate network delay for demo
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+
+                // Show success
+                document.getElementById('modalContent').classList.add('hidden');
+                const success = document.getElementById('successCard');
+                success.classList.remove('hidden');
+                setTimeout(() => { success.classList.remove('scale-95','opacity-0'); success.classList.add('scale-100','opacity-100'); }, 10);
+
+            } catch (error) {
+                console.error('Error saving:', error);
+                alert('Something went wrong. Please try again or email us directly.');
+                btn.disabled = false;
+                btnText.textContent = 'Submit Edit Request';
+                spinner.classList.add('hidden');
+            }
+        }
+
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.fade-up').forEach((elem, i) => { gsap.fromTo(elem, { opacity: 0, y: 30 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', scrollTrigger: { trigger: elem, start: 'top 85%', toggleActions: 'play none none none' }, delay: i * 0.05 }); });
+
+        window.addEventListener('scroll', () => { const header = document.getElementById('mainHeader'); if (window.pageYOffset > 100) header.classList.add('shadow-sm'); else header.classList.remove('shadow-sm'); });
+    </script>
+</body>
+</html>
